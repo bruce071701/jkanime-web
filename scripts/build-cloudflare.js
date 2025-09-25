@@ -77,6 +77,7 @@ try {
   const redirectsContent = `# Next.js 路由重定向
 /api/* /api/:splat 200
 /_next/* /_next/:splat 200
+/static/* /static/:splat 200
 /* /index.html 200
 `;
   
