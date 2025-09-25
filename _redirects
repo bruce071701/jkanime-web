@@ -1,0 +1,11 @@
+# Redirect old URLs to new structure
+/anime/:id /anime/:id 200
+/watch/:episodeId /watch/:episodeId 200
+/peliculas /peliculas 200
+/series /series 200
+/generos /generos 200
+/buscar /buscar 200
+/historial /historial 200
+
+# Handle SPA routing
+/* /index.html 200

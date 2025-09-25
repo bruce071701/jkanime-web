@@ -1,0 +1,168 @@
+import { Suspense } from 'react';
+import Link from 'next/link';
+import { apiClient } from '@/lib/api';
+import { Filter, SortAsc, Languages } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+interface AnimeFiltersProps {
+  currentGenre?: string;
+  currentSort: string;
+  currentLang?: string;
+  basePath: string;
+}
+
+async function GenreFilter({ currentGenre, basePath, currentSort, currentLang }: AnimeFiltersProps) {
+  try {
+    const genres = await apiClient.getGenres();
+
+    const buildGenreUrl = (genre?: string) => {
+      const params = new URLSearchParams();
+      if (genre) params.set('genre', genre);
+      if (currentLang) params.set('lang', currentLang);
+      params.set('sort', currentSort);
+      return `${basePath}?${params.toString()}`;
+    };
+
+    return (
+      <div className="flex flex-wrap gap-2">
+        <Link
+          href={buildGenreUrl()}
+          className={cn(
+            'px-3 py-1 rounded-full text-sm transition-colors',
+            !currentGenre
+              ? 'bg-primary-600 text-white'
+              : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+          )}
+        >
+          Todos
+        </Link>
+        
+        {genres.slice(0, 10).map((genre) => (
+          <Link
+            key={genre.name}
+            href={buildGenreUrl(genre.name)}
+            className={cn(
+              'px-3 py-1 rounded-full text-sm transition-colors',
+              currentGenre === genre.name
+                ? 'bg-primary-600 text-white'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            )}
+          >
+            {genre.name} ({genre.count})
+          </Link>
+        ))}
+      </div>
+    );
+  } catch (error) {
+    return (
+      <div className="text-gray-400 text-sm">
+        Error al cargar géneros
+      </div>
+    );
+  }
+}
+
+export function AnimeFilters({ currentGenre, currentSort, currentLang, basePath }: AnimeFiltersProps) {
+  const sortOptions = [
+    { value: 'latest', label: 'Más recientes' },
+    { value: 'popular', label: 'Más populares' },
+    { value: 'rating', label: 'Mejor valorados' }
+  ];
+
+  const languageOptions = [
+    { value: '', label: 'Todos los idiomas', icon: '🌐' },
+    { value: 'sub', label: 'Subtítulos', icon: '📝' },
+    { value: 'castellano', label: 'Español (Doblado)', icon: '🎙️' },
+    { value: 'latino', label: 'Latino (Doblado)', icon: '🎬' }
+  ];
+
+  const buildUrl = (sort?: string, lang?: string) => {
+    const params = new URLSearchParams();
+    if (currentGenre) params.set('genre', currentGenre);
+    if (lang !== undefined) {
+      if (lang) params.set('lang', lang);
+    } else if (currentLang) {
+      params.set('lang', currentLang);
+    }
+    params.set('sort', sort || currentSort);
+    return `${basePath}?${params.toString()}`;
+  };
+
+  return (
+    <div className="bg-gray-800 rounded-lg p-4 mb-6 space-y-4">
+      {/* Language Filter */}
+      <div>
+        <div className="flex items-center mb-3">
+          <Languages className="h-4 w-4 mr-2" />
+          <span className="font-medium">Idioma:</span>
+        </div>
+        
+        <div className="flex flex-wrap gap-2">
+          {languageOptions.map((option) => (
+            <Link
+              key={option.value}
+              href={buildUrl(undefined, option.value)}
+              className={cn(
+                'px-3 py-1 rounded-full text-sm transition-colors flex items-center gap-1',
+                (currentLang || '') === option.value
+                  ? 'bg-primary-600 text-white'
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              )}
+            >
+              <span>{option.icon}</span>
+              {option.label}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* Sort Options */}
+      <div>
+        <div className="flex items-center mb-3">
+          <SortAsc className="h-4 w-4 mr-2" />
+          <span className="font-medium">Ordenar por:</span>
+        </div>
+        
+        <div className="flex flex-wrap gap-2">
+          {sortOptions.map((option) => (
+            <Link
+              key={option.value}
+              href={buildUrl(option.value)}
+              className={cn(
+                'px-3 py-1 rounded-full text-sm transition-colors',
+                currentSort === option.value
+                  ? 'bg-primary-600 text-white'
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              )}
+            >
+              {option.label}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* Genre Filter */}
+      <div>
+        <div className="flex items-center mb-3">
+          <Filter className="h-4 w-4 mr-2" />
+          <span className="font-medium">Géneros:</span>
+        </div>
+        
+        <Suspense fallback={
+          <div className="flex gap-2">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="h-7 w-20 bg-gray-700 rounded-full animate-pulse" />
+            ))}
+          </div>
+        }>
+          <GenreFilter
+            currentGenre={currentGenre}
+            currentSort={currentSort}
+            currentLang={currentLang}
+            basePath={basePath}
+          />
+        </Suspense>
+      </div>
+    </div>
+  );
+}
