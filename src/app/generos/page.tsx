@@ -4,18 +4,21 @@ import { AnimeListSkeleton } from '@/components/ui/AnimeListSkeleton';
 import { generateListMetadata } from '@/lib/seo';
 import Link from 'next/link';
 
+export const runtime = 'edge';
+
 interface GenresPageProps {
-  searchParams: {
+  searchParams: Promise<{
     page?: string;
     genre?: string;
     sort?: string;
     lang?: string;
-  };
+  }>;
 }
 
 export async function generateMetadata({ searchParams }: GenresPageProps) {
-  const page = parseInt(searchParams.page || '1');
-  const genre = searchParams.genre;
+  const resolvedSearchParams = await searchParams;
+  const page = parseInt(resolvedSearchParams.page || '1');
+  const genre = resolvedSearchParams.genre;
   
   return generateListMetadata('all', genre, page);
 }
@@ -40,8 +43,9 @@ const animeGenres = [
   { name: 'Militar', slug: 'Militar', color: 'bg-amber-700', count: '2+' },
 ];
 
-export default function GenresPage({ searchParams }: GenresPageProps) {
-  const selectedGenre = searchParams.genre;
+export default async function GenresPage({ searchParams }: GenresPageProps) {
+  const resolvedSearchParams = await searchParams;
+  const selectedGenre = resolvedSearchParams.genre;
 
   if (selectedGenre) {
     // If a genre is selected, show anime list for that genre
@@ -66,10 +70,10 @@ export default function GenresPage({ searchParams }: GenresPageProps) {
 
         <Suspense fallback={<AnimeListSkeleton />}>
           <AnimeList
-            page={parseInt(searchParams.page || '1')}
+            page={parseInt(resolvedSearchParams.page || '1')}
             genre={selectedGenre}
-            sort={searchParams.sort as 'latest' | 'popular' | 'rating' | undefined}
-            lang={searchParams.lang}
+            sort={resolvedSearchParams.sort as 'latest' | 'popular' | 'rating' | undefined}
+            lang={resolvedSearchParams.lang}
             basePath="/generos"
           />
         </Suspense>

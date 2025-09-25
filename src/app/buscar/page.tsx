@@ -7,16 +7,19 @@ import { AnimeListSkeleton } from '@/components/ui/AnimeListSkeleton';
 import { generateMetadata as generateSEOMetadata } from '@/lib/seo';
 import { Search } from 'lucide-react';
 
+export const runtime = 'edge';
+
 interface SearchPageProps {
-  searchParams: {
+  searchParams: Promise<{
     q?: string;
     page?: string;
-  };
+  }>;
 }
 
 export async function generateMetadata({ searchParams }: SearchPageProps) {
-  const query = searchParams.q;
-  const page = parseInt(searchParams.page || '1');
+  const resolvedSearchParams = await searchParams;
+  const query = resolvedSearchParams.q;
+  const page = parseInt(resolvedSearchParams.page || '1');
   
   if (!query) {
     return generateSEOMetadata({
@@ -90,9 +93,10 @@ async function SearchResults({ query, page }: { query: string; page: number }) {
   }
 }
 
-export default function SearchPage({ searchParams }: SearchPageProps) {
-  const query = searchParams.q?.trim();
-  const page = parseInt(searchParams.page || '1');
+export default async function SearchPage({ searchParams }: SearchPageProps) {
+  const resolvedSearchParams = await searchParams;
+  const query = resolvedSearchParams.q?.trim();
+  const page = parseInt(resolvedSearchParams.page || '1');
 
   if (!query) {
     return (

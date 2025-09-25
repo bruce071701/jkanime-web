@@ -7,9 +7,12 @@ import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { Play, Calendar, Star, Clock, Tag } from 'lucide-react';
 import { formatYear, formatRating } from '@/lib/utils';
 
+export const runtime = 'edge';
+
 export async function generateMetadata({ params }: AnimeDetailPageProps) {
   try {
-    const animeId = parseInt(params.id);
+    const resolvedParams = await params;
+    const animeId = parseInt(resolvedParams.id);
     if (isNaN(animeId)) return {};
     
     const anime = await apiClient.getAnimeDetail(animeId);
@@ -20,14 +23,15 @@ export async function generateMetadata({ params }: AnimeDetailPageProps) {
 }
 
 interface AnimeDetailPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) {
+  const resolvedParams = await params;
   try {
-    const animeId = parseInt(params.id);
+    const animeId = parseInt(resolvedParams.id);
     if (isNaN(animeId)) {
       notFound();
     }

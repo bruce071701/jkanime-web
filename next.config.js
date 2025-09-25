@@ -1,6 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  
   // 图片配置
   images: {
     domains: [
@@ -14,6 +13,8 @@ const nextConfig = {
     ],
     unoptimized: true // Cloudflare Pages 需要
   },
+  
+
   
   // 压缩和优化
   compress: true,

@@ -3,27 +3,31 @@ import { AnimeList } from '@/components/sections/AnimeList';
 import { AnimeListSkeleton } from '@/components/ui/AnimeListSkeleton';
 import { generateListMetadata } from '@/lib/seo';
 
+export const runtime = 'edge';
+
 interface MoviesPageProps {
-  searchParams: {
+  searchParams: Promise<{
     page?: string;
     genre?: string;
     sort?: string;
     lang?: string;
-  };
+  }>;
 }
 
 export async function generateMetadata({ searchParams }: MoviesPageProps) {
-  const page = parseInt(searchParams.page || '1');
-  const genre = searchParams.genre;
+  const resolvedSearchParams = await searchParams;
+  const page = parseInt(resolvedSearchParams.page || '1');
+  const genre = resolvedSearchParams.genre;
   
   return generateListMetadata('movie', genre, page);
 }
 
-export default function MoviesPage({ searchParams }: MoviesPageProps) {
-  const page = parseInt(searchParams.page || '1');
-  const genre = searchParams.genre;
-  const sort = searchParams.sort as 'latest' | 'popular' | 'rating' | undefined;
-  const lang = searchParams.lang;
+export default async function MoviesPage({ searchParams }: MoviesPageProps) {
+  const resolvedSearchParams = await searchParams;
+  const page = parseInt(resolvedSearchParams.page || '1');
+  const genre = resolvedSearchParams.genre;
+  const sort = resolvedSearchParams.sort as 'latest' | 'popular' | 'rating' | undefined;
+  const lang = resolvedSearchParams.lang;
 
   return (
     <div className="container-custom py-8">

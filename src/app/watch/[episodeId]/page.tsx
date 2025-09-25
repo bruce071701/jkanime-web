@@ -3,9 +3,12 @@ import { WatchPageClient } from '@/components/pages/WatchPageClient';
 import { apiClient } from '@/lib/api';
 import { generateMetadata as generateSEOMetadata } from '@/lib/seo';
 
+export const runtime = 'edge';
+
 export async function generateMetadata({ params }: WatchPageProps) {
   try {
-    const episodeId = parseInt(params.episodeId);
+    const resolvedParams = await params;
+    const episodeId = parseInt(resolvedParams.episodeId);
     if (isNaN(episodeId)) return {};
     
     const data = await apiClient.getEpisodePlay(episodeId);
@@ -27,11 +30,12 @@ export async function generateMetadata({ params }: WatchPageProps) {
 }
 
 interface WatchPageProps {
-  params: {
+  params: Promise<{
     episodeId: string;
-  };
+  }>;
 }
 
-export default function WatchPage({ params }: WatchPageProps) {
-  return <WatchPageClient episodeId={params.episodeId} />;
+export default async function WatchPage({ params }: WatchPageProps) {
+  const resolvedParams = await params;
+  return <WatchPageClient episodeId={resolvedParams.episodeId} />;
 }

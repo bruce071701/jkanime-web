@@ -4,13 +4,15 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api-jk.fun
 
 // 强制动态渲染
 export const dynamic = 'force-dynamic';
+export const runtime = 'edge';
 
 export async function GET(
   request: Request,
-  { params }: { params: { episodeId: string } }
+  { params }: { params: Promise<{ episodeId: string }> }
 ) {
   try {
-    const episodeId = params.episodeId;
+    const resolvedParams = await params;
+    const episodeId = resolvedParams.episodeId;
     console.log('API Proxy: Fetching episode play data for ID', episodeId);
     
     const response = await fetch(`${API_BASE_URL}/api/v1/anime/play/${episodeId}`, {
