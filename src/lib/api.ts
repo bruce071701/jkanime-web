@@ -338,33 +338,32 @@ class ApiClient {
     private transformAnime = (apiAnime: any): Anime => {
         const transformedAnime: Anime = {
             ...apiAnime,
-            title: apiAnime.name || apiAnime.title,
+            type: ['serie', 'tv', 'series'].includes(apiAnime.type?.toLowerCase()) ? 'series' : 'movie',
+            status: apiAnime.status === '0' || apiAnime.status === 0 ? 'ongoing' : 'completed',
+            // 兼容性字段
+            title: apiAnime.name,
             description: apiAnime.overview,
             poster: apiAnime.imagen,
             banner: apiAnime.imagenCapitulo || apiAnime.imagen,
-            type: ['serie', 'tv', 'series'].includes(apiAnime.type?.toLowerCase()) ? 'series' : 'movie',
-            status: apiAnime.status === '0' || apiAnime.status === 0 ? 'ongoing' : 'completed',
             year: apiAnime.aired ? this.extractYear(apiAnime.aired) : undefined,
-            lang: apiAnime.lang,
         };
 
         // Handle genres - convert string to array if needed
         if (typeof apiAnime.genres === 'string' && apiAnime.genres) {
-            transformedAnime.genres = apiAnime.genres.split(',').map(g => g.trim());
+            transformedAnime.genres = apiAnime.genres.split(',').map((g: string) => g.trim());
         } else if (Array.isArray(apiAnime.genres)) {
             transformedAnime.genres = apiAnime.genres;
         } else {
             transformedAnime.genres = [];
         }
 
-        // Handle rating - convert to number if it's a string
-        if (typeof apiAnime.rating === 'string' && apiAnime.rating) {
-            const numRating = parseFloat(apiAnime.rating);
-            transformedAnime.rating = isNaN(numRating) ? undefined : numRating / 1000;
+        // Handle rating - keep as string or number as per type definition
+        if (typeof apiAnime.rating === 'string') {
+            transformedAnime.rating = apiAnime.rating;
         } else if (typeof apiAnime.rating === 'number') {
             transformedAnime.rating = apiAnime.rating;
         } else {
-            transformedAnime.rating = undefined;
+            transformedAnime.rating = "0";
         }
 
         return transformedAnime;

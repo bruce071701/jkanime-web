@@ -62,9 +62,9 @@ export function addToWatchHistory(
     
     const newItem: WatchHistoryItem = {
       animeId: anime.id,
-      animeTitle: anime.title,
-      animePoster: anime.poster || '',
-      animeType: anime.type,
+      animeTitle: anime.name,
+      animePoster: anime.imagen || '',
+      animeType: anime.type as 'movie' | 'series',
       animeLang: anime.lang,
       episodeId: episode.id,
       episodeNumber: episode.episodeNumber || episode.number || 1,

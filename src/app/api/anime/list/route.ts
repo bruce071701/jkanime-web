@@ -13,28 +13,28 @@ export async function GET(request: NextRequest) {
     const modifiedParams = new URLSearchParams();
     const hasGenreFilter = searchParams.has('genre');
     
-    for (const [key, value] of searchParams.entries()) {
+    searchParams.forEach((value, key) => {
       if (key === 'type') {
         // If we have a genre filter, skip type parameter as it may cause conflicts
         if (hasGenreFilter) {
           console.log('API Proxy: Skipping type parameter due to genre filter conflict');
-          continue;
+          return;
         }
         
         if (value === 'series') {
           // For series, we want type='Serie'
           console.log('API Proxy: Requesting series (type=Serie)');
           modifiedParams.append(key, 'Serie');
-          continue;
+          return;
         } else if (value === 'movie') {
           // For movies, we want type='movie'
           console.log('API Proxy: Requesting movies (type=movie)');
           modifiedParams.append(key, 'movie');
-          continue;
+          return;
         }
       }
       modifiedParams.append(key, value);
-    }
+    });
     
     const queryString = modifiedParams.toString();
     const apiUrl = `${API_BASE_URL}/api/v1/anime/list${queryString ? `?${queryString}` : ''}`;

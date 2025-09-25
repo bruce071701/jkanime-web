@@ -96,13 +96,13 @@ export function generateMetadata({
 }
 
 export function generateAnimeMetadata(anime: Anime): Metadata {
-  const title = anime.title;
-  const description = anime.description 
-    ? `${anime.description.substring(0, 155)}...`
-    : `Mira ${anime.title} online con subtítulos en español. ${anime.type === 'movie' ? 'Película' : 'Serie'} de anime gratis en JKAnime FLV.`;
+  const title = anime.name;
+  const description = anime.overview 
+    ? `${anime.overview.substring(0, 155)}...`
+    : `Mira ${anime.name} online con subtítulos en español. ${anime.type === 'movie' ? 'Película' : 'Serie'} de anime gratis en JKAnime FLV.`;
   
   const keywords = [
-    anime.title,
+    anime.name,
     'jkanime',
     'animeflv',
     'jkanimeflv',
@@ -120,7 +120,7 @@ export function generateAnimeMetadata(anime: Anime): Metadata {
     title,
     description,
     path: `/anime/${anime.id}`,
-    image: anime.poster,
+    image: anime.imagen,
     type: anime.type === 'movie' ? 'video.movie' : 'video.tv_show',
     keywords,
   });
@@ -169,9 +169,9 @@ export function generateStructuredData(anime: Anime) {
   return {
     '@context': 'https://schema.org',
     '@type': anime.type === 'movie' ? 'Movie' : 'TVSeries',
-    name: anime.title,
-    description: anime.description,
-    image: anime.poster,
+    name: anime.name,
+    description: anime.overview,
+    image: anime.imagen,
     url: `${baseUrl}/anime/${anime.id}`,
     genre: anime.genres,
     datePublished: anime.year ? `${anime.year}-01-01` : undefined,

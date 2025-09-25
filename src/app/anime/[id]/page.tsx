@@ -46,10 +46,10 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
         <div className="min-h-screen">
         {/* Hero Section */}
         <div className="relative h-96 md:h-[500px] overflow-hidden">
-          {anime.banner && (
+          {anime.imagen && (
             <Image
-              src={anime.banner}
-              alt={anime.title}
+              src={anime.imagen}
+              alt={anime.name || 'Anime'}
               fill
               className="object-cover"
               priority
@@ -65,7 +65,7 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
                 label: anime.type === 'series' ? 'Series' : 'Películas', 
                 href: anime.type === 'series' ? '/series' : '/peliculas' 
               },
-              { label: anime.title }
+              { label: anime.name || 'Anime' }
             ]}
           />
           
@@ -74,8 +74,8 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
             <div className="lg:col-span-1">
               <div className="relative aspect-[3/4] max-w-sm mx-auto lg:mx-0">
                 <Image
-                  src={anime.poster || '/placeholder-anime.jpg'}
-                  alt={anime.title}
+                  src={anime.imagen || '/placeholder-anime.jpg'}
+                  alt={anime.name || 'Anime'}
                   fill
                   className="object-cover rounded-lg shadow-2xl"
                 />
@@ -85,7 +85,7 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
             {/* Content */}
             <div className="lg:col-span-2 space-y-6">
               <div>
-                <h1 className="text-3xl md:text-4xl font-bold mb-4">{anime.title}</h1>
+                <h1 className="text-3xl md:text-4xl font-bold mb-4">{anime.name}</h1>
                 
                 {/* Meta info */}
                 <div className="flex flex-wrap gap-4 mb-6 text-sm">
@@ -132,9 +132,9 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
                 </div>
 
                 {/* Genres */}
-                {anime.genres && anime.genres.length > 0 && (
+                {anime.genres && (
                   <div className="flex flex-wrap gap-2 mb-6">
-                    {anime.genres.map((genre) => (
+                    {(Array.isArray(anime.genres) ? anime.genres : anime.genres.split(',')).map((genre) => (
                       <Link
                         key={genre}
                         href={`/series?genre=${encodeURIComponent(genre)}`}
@@ -233,7 +233,7 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
                           <Play className="h-5 w-5 text-primary-400 group-hover:text-primary-300 transition-colors" />
                         </div>
                         
-                        {episode.title && episode.title !== anime.title && episode.title.trim() && (
+                        {episode.title && episode.title !== anime.name && episode.title.trim() && (
                           <p className="text-sm text-gray-300 mb-2 line-clamp-2 font-medium">
                             {episode.title}
                           </p>
