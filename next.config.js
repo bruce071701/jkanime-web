@@ -5,7 +5,7 @@ const nextConfig = {
     domains: [
       'localhost', 
       'jkanimeflv.com',
-      'api.jkanime.net',
+      'api-jk.funnyu.xyz',
       'image.tmdb.org',
       'latanime.org',
       'cdn.jkdesu.com',

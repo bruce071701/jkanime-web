@@ -27,7 +27,7 @@
    在 Cloudflare Pages 项目设置中添加以下环境变量：
    ```
    NEXT_PUBLIC_SITE_URL=https://jkanimeflv.com
-   NEXT_PUBLIC_API_BASE_URL=https://api.jkanime.net
+   NEXT_PUBLIC_API_BASE_URL=https://api-jk.funnyu.xyz
    USE_MOCK_API=false
    NODE_ENV=production
    ```

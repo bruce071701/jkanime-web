@@ -40,6 +40,16 @@ export default function RootLayout({
   return (
     <html lang="es">
       <head>
+        {/* Favicon 和图标 */}
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="manifest" href="/manifest.json" />
+        
+        {/* 主题颜色 */}
+        <meta name="theme-color" content="#3b82f6" />
+        <meta name="msapplication-TileColor" content="#3b82f6" />
+        
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

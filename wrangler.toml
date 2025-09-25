@@ -12,9 +12,11 @@ name = "jkanimeflv-preview"
 [env.production.vars]
 NODE_ENV = "production"
 NEXT_PUBLIC_SITE_URL = "https://jkanimeflv.com"
+NEXT_PUBLIC_API_BASE_URL = "https://api-jk.funnyu.xyz"
 USE_MOCK_API = "false"
 
 [env.preview.vars]
 NODE_ENV = "development"
 NEXT_PUBLIC_SITE_URL = "https://jkanimeflv-preview.pages.dev"
+NEXT_PUBLIC_API_BASE_URL = "https://api-jk.funnyu.xyz"
 USE_MOCK_API = "true"

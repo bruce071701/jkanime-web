@@ -1,0 +1,25 @@
+<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景 -->
+  <rect width="180" height="180" rx="40" fill="url(#appleGradient)"/>
+  
+  <!-- 主要播放图标 -->
+  <path d="M65 45L135 90L65 135V45Z" fill="white" stroke="white" stroke-width="2"/>
+  
+  <!-- JK 标识 -->
+  <text x="30" y="40" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="white">JK</text>
+  
+  <!-- FLV 标识 -->
+  <text x="110" y="160" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#E0E7FF">FLV</text>
+  
+  <!-- 装饰元素 -->
+  <circle cx="150" cy="30" r="8" fill="rgba(255,255,255,0.3)"/>
+  <circle cx="30" cy="150" r="6" fill="rgba(255,255,255,0.2)"/>
+  
+  <defs>
+    <linearGradient id="appleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1E40AF"/>
+      <stop offset="50%" style="stop-color:#3B82F6"/>
+      <stop offset="100%" style="stop-color:#60A5FA"/>
+    </linearGradient>
+  </defs>
+</svg>

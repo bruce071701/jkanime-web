@@ -5,14 +5,14 @@ import { mockApiClient } from './mock-api';
 const getApiBaseUrl = () => {
     // Server-side rendering
     if (typeof window === 'undefined') {
-        return process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+        return process.env.API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api-jk.funnyu.xyz';
     }
     // Client-side
-    return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+    return process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api-jk.funnyu.xyz';
 };
 
 const API_BASE_URL = getApiBaseUrl();
-const USE_MOCK_API = process.env.NEXT_PUBLIC_USE_MOCK_API === 'true';
+const USE_MOCK_API = process.env.USE_MOCK_API === 'true' || process.env.NEXT_PUBLIC_USE_MOCK_API === 'true';
 
 class ApiClient {
     private async request<T>(endpoint: string): Promise<T> {
