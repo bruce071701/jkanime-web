@@ -3,16 +3,28 @@ import { mockApiClient } from './mock-api';
 
 // Use different URLs for server-side and client-side
 const getApiBaseUrl = () => {
-    // Server-side rendering
-    if (typeof window === 'undefined') {
-        return process.env.API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api-jk.funnyu.xyz';
+    // 优先使用环境变量，如果没有设置则使用生产环境 API
+    const envApiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.API_URL;
+    
+    // 如果环境变量存在且不为空，使用环境变量
+    if (envApiUrl && envApiUrl.trim() !== '') {
+        return envApiUrl;
     }
-    // Client-side
-    return process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api-jk.funnyu.xyz';
+    
+    // 否则使用生产环境 API
+    return 'https://api-jk.funnyu.xyz';
 };
 
 const API_BASE_URL = getApiBaseUrl();
 const USE_MOCK_API = process.env.USE_MOCK_API === 'true' || process.env.NEXT_PUBLIC_USE_MOCK_API === 'true';
+
+// 开发环境下显示 API 配置信息
+if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+    console.log('🔧 API Configuration:');
+    console.log('  API_BASE_URL:', API_BASE_URL);
+    console.log('  USE_MOCK_API:', USE_MOCK_API);
+    console.log('  NODE_ENV:', process.env.NODE_ENV);
+}
 
 class ApiClient {
     private async request<T>(endpoint: string): Promise<T> {

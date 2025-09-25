@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const API_BASE_URL = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api-jk.funnyu.xyz';
 
 export async function GET(request: NextRequest) {
   try {
     console.log('API Proxy: Handling anime list request');
     
-    // Get search parameters from the request
-    const { searchParams } = new URL(request.url);
+    // Get search parameters from the request URL
+    const url = new URL(request.url);
+    const searchParams = url.searchParams;
     
     // Handle the type parameter mapping
     const modifiedParams = new URLSearchParams();

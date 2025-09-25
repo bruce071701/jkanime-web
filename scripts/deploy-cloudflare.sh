@@ -16,7 +16,7 @@ npm ci
 
 # 构建项目
 echo "🔨 构建项目..."
-npm run build
+npm run build:prod
 
 # 检查构建是否成功
 if [ $? -ne 0 ]; then

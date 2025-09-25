@@ -24,7 +24,7 @@ jobs:
         run: npm ci
       
       - name: Build application
-        run: npm run build
+        run: npm run build:prod
         env:
           NEXT_PUBLIC_SITE_URL: https://jkanimeflv.com
           NEXT_PUBLIC_API_BASE_URL: https://api-jk.funnyu.xyz
