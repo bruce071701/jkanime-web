@@ -38,7 +38,6 @@
     "typescript": "^5"
   },
   "devDependencies": {
-    "@cloudflare/next-on-pages": "^1.13.16",
     "cross-env": "^7.0.3",
     "eslint": "^8",
     "eslint-config-next": "14.0.0"
