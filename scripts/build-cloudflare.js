@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 
 /**
- * 强制生产环境构建脚本
- * 临时重命名 .env.local 文件，确保使用生产环境配置
+ * Cloudflare Pages 专用构建脚本
  */
 
 const fs = require('fs');
+const path = require('path');
 const { execSync } = require('child_process');
 
-console.log('🚀 开始生产环境构建...');
+console.log('🌐 开始 Cloudflare Pages 构建...');
 
 // 备份 .env.local 文件（如果存在）
 const envLocalPath = '.env.local';
@@ -26,7 +26,7 @@ if (fs.existsSync(envLocalPath)) {
 }
 
 // 创建临时的生产环境配置
-const prodEnvContent = `# 临时生产环境配置
+const prodEnvContent = `# Cloudflare Pages 生产环境配置
 NODE_ENV=production
 NEXT_PUBLIC_SITE_URL=https://jkanimeflv.com
 NEXT_PUBLIC_API_BASE_URL=https://api-jk.funnyu.xyz
@@ -35,10 +35,10 @@ NEXT_TELEMETRY_DISABLED=1
 `;
 
 fs.writeFileSync(envLocalPath, prodEnvContent);
-console.log('✅ 创建临时生产环境配置');
+console.log('✅ 创建 Cloudflare Pages 环境配置');
 
 try {
-  // 执行构建
+  // 执行 Next.js 构建
   console.log('🔨 执行 Next.js 构建...');
   execSync('next build', { 
     stdio: 'inherit',
@@ -52,10 +52,37 @@ try {
     }
   });
   
-  // 构建完成，无需额外处理
-  console.log('🌐 Next.js 构建完成，准备部署到 Cloudflare Pages');
+  console.log('✅ Next.js 构建成功！');
   
-  console.log('✅ 生产环境构建成功！');
+  // 创建 Cloudflare Pages 所需的文件
+  console.log('📝 创建 Cloudflare Pages 配置文件...');
+  
+  // 创建 _headers 文件
+  const headersContent = `/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  X-XSS-Protection: 1; mode=block
+  Referrer-Policy: strict-origin-when-cross-origin
+
+/_next/static/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/api/*
+  Cache-Control: no-cache
+`;
+  
+  fs.writeFileSync('.next/_headers', headersContent);
+  
+  // 创建 _redirects 文件
+  const redirectsContent = `# Next.js 路由重定向
+/api/* /api/:splat 200
+/_next/* /_next/:splat 200
+/* /index.html 200
+`;
+  
+  fs.writeFileSync('.next/_redirects', redirectsContent);
+  
+  console.log('✅ Cloudflare Pages 配置文件创建完成');
   
 } catch (error) {
   console.error('❌ 构建失败:', error.message);
@@ -74,6 +101,11 @@ try {
   }
 }
 
-console.log('🎉 生产环境构建完成！');
+console.log('🎉 Cloudflare Pages 构建完成！');
 console.log('📁 构建输出: .next/');
-console.log('🚀 可以部署到 Cloudflare Pages');
+console.log('🚀 准备部署到 Cloudflare Pages');
+console.log('');
+console.log('📋 部署说明：');
+console.log('1. 构建输出目录: .next');
+console.log('2. 构建命令: npm run build:cloudflare');
+console.log('3. 环境变量已配置在 wrangler.toml 中');
