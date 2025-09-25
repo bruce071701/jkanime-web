@@ -46,10 +46,10 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
         <div className="min-h-screen">
         {/* Hero Section */}
         <div className="relative h-96 md:h-[500px] overflow-hidden">
-          {anime.imagen && (
+          {(anime.imagenCapitulo || anime.imagen) && (
             <Image
-              src={anime.imagen}
-              alt={anime.name || 'Anime'}
+              src={anime.imagenCapitulo || anime.imagen}
+              alt={anime.name || anime.nameAlternative || 'Anime'}
               fill
               className="object-cover"
               priority
@@ -65,7 +65,7 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
                 label: anime.type === 'series' ? 'Series' : 'Películas', 
                 href: anime.type === 'series' ? '/series' : '/peliculas' 
               },
-              { label: anime.name || 'Anime' }
+              { label: anime.name || anime.nameAlternative || 'Anime' }
             ]}
           />
           
@@ -75,7 +75,7 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
               <div className="relative aspect-[3/4] max-w-sm mx-auto lg:mx-0">
                 <Image
                   src={anime.imagen || '/placeholder-anime.jpg'}
-                  alt={anime.name || 'Anime'}
+                  alt={anime.name || anime.nameAlternative || 'Anime'}
                   fill
                   className="object-cover rounded-lg shadow-2xl"
                 />
@@ -85,7 +85,7 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
             {/* Content */}
             <div className="lg:col-span-2 space-y-6">
               <div>
-                <h1 className="text-3xl md:text-4xl font-bold mb-4">{anime.name}</h1>
+                <h1 className="text-3xl md:text-4xl font-bold mb-4">{anime.name || anime.nameAlternative || 'Anime'}</h1>
                 
                 {/* Meta info */}
                 <div className="flex flex-wrap gap-4 mb-6 text-sm">
@@ -94,10 +94,10 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
                     {anime.type === 'series' ? 'Serie' : 'Película'}
                   </div>
                   
-                  {anime.year && (
+                  {(anime.year || anime.aired) && (
                     <div className="flex items-center bg-gray-800 px-3 py-1 rounded">
                       <Calendar className="h-4 w-4 mr-2" />
-                      {formatYear(anime.year)}
+                      {formatYear(anime.year || (anime.aired ? new Date(anime.aired).getFullYear() : undefined))}
                     </div>
                   )}
                   
@@ -148,9 +148,9 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
                 )}
 
                 {/* Description */}
-                {anime.description && (
+                {(anime.overview || anime.description) && (
                   <p className="text-gray-300 leading-relaxed mb-6">
-                    {anime.description}
+                    {anime.overview || anime.description}
                   </p>
                 )}
               </div>

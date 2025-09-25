@@ -11,7 +11,8 @@
     "preview": "npm run build && npx serve out",
     "analyze": "ANALYZE=true npm run build",
     "icons:generate": "node scripts/generate-icons.js",
-    "icons:open": "open scripts/icon-generator.html"
+    "icons:open": "open scripts/icon-generator.html",
+    "test:api": "node scripts/test-api.js"
   },
   "dependencies": {
     "next": "14.0.0",
