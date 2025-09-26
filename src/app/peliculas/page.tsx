@@ -1,4 +1,4 @@
-import { AnimeList } from '@/components/sections/AnimeList';
+import { SimpleAnimeList } from '@/components/sections/SimpleAnimeList';
 import { generateListMetadata } from '@/lib/seo';
 
 export const runtime = 'edge';
@@ -24,7 +24,7 @@ export default async function MoviesPage({ searchParams }: MoviesPageProps) {
   const resolvedSearchParams = await searchParams;
   const page = parseInt(resolvedSearchParams.page || '1');
   const genre = resolvedSearchParams.genre;
-  const sort = resolvedSearchParams.sort as 'latest' | 'popular' | 'rating' | undefined;
+  const sort = resolvedSearchParams.sort;
   const lang = resolvedSearchParams.lang;
 
   return (
@@ -36,7 +36,7 @@ export default async function MoviesPage({ searchParams }: MoviesPageProps) {
         </p>
       </div>
 
-      <AnimeList
+      <SimpleAnimeList
         type="movie"
         page={page}
         genre={genre}
