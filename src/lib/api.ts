@@ -137,14 +137,14 @@ class ApiClient {
             const latestSeries = Array.isArray(data.latestSeries) ? data.latestSeries : [];
             
             const processedData = {
-                latestMovies: latestMovies.map((anime, index) => {
+                latestMovies: latestMovies.map((anime: any, index: number) => {
                     try {
                         return this.transformAnime(anime);
                     } catch (error) {
                         return null;
                     }
                 }).filter(Boolean),
-                latestSeries: latestSeries.map((anime, index) => {
+                latestSeries: latestSeries.map((anime: any, index: number) => {
                     try {
                         return this.transformAnime(anime);
                     } catch (error) {
@@ -275,7 +275,7 @@ class ApiClient {
             };
             
             // Transform players data
-            const transformedPlayers = (data.players || []).map(this.transformPlayer);
+            const transformedPlayers = (data.players || []).map((player: any) => this.transformPlayer(player));
             
             return {
                 episode: transformedEpisode,
@@ -354,7 +354,7 @@ class ApiClient {
             }
             
             // Transform API response to match our expected format
-            const transformedAnimes = (data.list || data.animes || []).map(this.transformAnime);
+            const transformedAnimes = (data.list || data.animes || []).map((anime: any) => this.transformAnime(anime));
             
             return {
                 animes: transformedAnimes,
@@ -540,7 +540,7 @@ class ApiClient {
         const response = await this.request<{keyword: string; list: Anime[]; pagination: any}>(`/api/v1/anime/search?${searchParams}`);
         
         return {
-            animes: response.list.map(this.transformAnime),
+            animes: response.list.map((anime: any) => this.transformAnime(anime)),
             total: response.pagination.totalCount
         };
     }
