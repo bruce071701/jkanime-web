@@ -63,7 +63,7 @@ export default function GenresPage() {
         params.append('size', '24');
 
         const queryString = params.toString();
-        const apiUrl = `https://api-jk.funnyu.xyz/api/v1/anime/list${queryString ? `?${queryString}` : ''}`;
+        const apiUrl = `/api/anime/list${queryString ? `?${queryString}` : ''}`;
 
         const response = await fetch(apiUrl, {
           headers: {
@@ -75,14 +75,32 @@ export default function GenresPage() {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
 
-        const data = await response.json();
+        const result = await response.json();
         
+        // 处理API响应数据
+        let data;
+        if (result.result_code !== undefined) {
+          if (result.result_code !== 200) {
+            throw new Error(result.msg || 'API returned error');
+          }
+          data = result.data;
+        } else if (result.msg !== undefined) {
+          if (result.msg !== 'succeed') {
+            throw new Error(result.msg || 'API returned error');
+          }
+          data = result.data;
+        } else if (result.error) {
+          throw new Error(result.error);
+        } else {
+          data = result;
+        }
+
         let animeList = [];
         let totalCount = 0;
 
-        if (data.data && data.data.list) {
-          animeList = data.data.list;
-          totalCount = data.data.pagination?.totalCount || 0;
+        if (data && data.list) {
+          animeList = data.list;
+          totalCount = data.pagination?.totalCount || 0;
         }
 
         const processedAnimes = animeList.map((anime: any) => ({

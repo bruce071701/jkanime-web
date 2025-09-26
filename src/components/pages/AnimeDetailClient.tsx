@@ -26,7 +26,7 @@ export function AnimeDetailClient() {
       try {
         console.log('AnimeDetail: Loading anime', animeId);
         
-        const response = await fetch(`https://api-jk.funnyu.xyz/api/v1/anime/detail/${animeId}`, {
+        const response = await fetch(`/api/anime/detail/${animeId}`, {
           headers: {
             'Content-Type': 'application/json',
           },
@@ -53,6 +53,8 @@ export function AnimeDetailClient() {
             throw new Error(result.msg || 'API returned error');
           }
           data = result.data;
+        } else if (result.error) {
+          throw new Error(result.error);
         } else {
           data = result;
         }

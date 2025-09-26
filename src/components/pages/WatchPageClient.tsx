@@ -33,7 +33,7 @@ export function WatchPageClient() {
         }
 
         // Load episode play data
-        const episodeResponse = await fetch(`https://api-jk.funnyu.xyz/api/v1/anime/play/${id}`, {
+        const episodeResponse = await fetch(`/api/anime/play/${id}`, {
           headers: {
             'Content-Type': 'application/json',
           },
@@ -56,6 +56,8 @@ export function WatchPageClient() {
             throw new Error(episodeResult.msg || 'API returned error');
           }
           episodeData = episodeResult.data;
+        } else if (episodeResult.error) {
+          throw new Error(episodeResult.error);
         } else {
           episodeData = episodeResult;
         }
@@ -87,7 +89,7 @@ export function WatchPageClient() {
         // Load anime details to get all episodes
         if (episode.animeId) {
           try {
-            const animeResponse = await fetch(`https://api-jk.funnyu.xyz/api/v1/anime/detail/${episode.animeId}`, {
+            const animeResponse = await fetch(`/api/anime/detail/${episode.animeId}`, {
               headers: {
                 'Content-Type': 'application/json',
               },
@@ -105,6 +107,10 @@ export function WatchPageClient() {
                 if (animeResult.msg === 'succeed') {
                   animeData = animeResult.data;
                 }
+              } else if (animeResult.error) {
+                // Handle error case
+                console.warn('Anime detail error:', animeResult.error);
+                animeData = null;
               } else {
                 animeData = animeResult;
               }

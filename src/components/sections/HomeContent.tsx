@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { apiClient } from '@/lib/api';
+// Removed apiClient import to avoid Edge Runtime issues
 import { AnimeCard } from '@/components/ui/AnimeCard';
 import { WatchHistory } from '@/components/sections/WatchHistory';
 import { HomeData } from '@/types/anime';
@@ -21,8 +21,8 @@ export function HomeContent() {
       setError(null);
       
       try {
-        // 直接调用生产环境API
-        const response = await fetch('https://api-jk.funnyu.xyz/api/v1/anime/home');
+        // 使用API路由避免CORS问题
+        const response = await fetch('/api/anime/home');
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { apiClient } from '@/lib/api';
+// Removed apiClient import to avoid Edge Runtime issues
 import { Filter, SortAsc, Languages } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -19,9 +19,28 @@ function GenreFilter({ currentGenre, basePath, currentSort, currentLang }: Anime
 
   useEffect(() => {
     const loadGenres = () => {
-      apiClient.getGenres()
-        .then((genresData) => {
-          setGenres(genresData);
+      fetch('/api/anime/genres')
+        .then(response => response.json())
+        .then((result) => {
+          // 处理API响应数据
+          let data;
+          if (result.result_code !== undefined) {
+            if (result.result_code === 200) {
+              data = result.data;
+            }
+          } else if (result.msg !== undefined) {
+            if (result.msg === 'succeed') {
+              data = result.data;
+            }
+          } else if (!result.error) {
+            data = result;
+          }
+          
+          if (data && Array.isArray(data)) {
+            setGenres(data);
+          } else {
+            setGenres([]);
+          }
         })
         .catch(() => {
           setGenres([]);

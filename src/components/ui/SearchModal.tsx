@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Search, X } from 'lucide-react';
 import Link from 'next/link';
-import { apiClient } from '@/lib/api';
+// Removed apiClient import to avoid Edge Runtime issues
 import { Anime } from '@/types/anime';
 import { AnimeCard } from '@/components/ui/AnimeCard';
 
@@ -33,8 +33,63 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
       setIsLoading(true);
       try {
-        const response = await apiClient.searchAnime(query, 1, 6);
-        setResults(response.animes);
+        const params = new URLSearchParams();
+        params.append('q', query);
+        params.append('page', '1');
+        params.append('size', '6');
+
+        const queryString = params.toString();
+        const apiUrl = `/api/anime/search${queryString ? `?${queryString}` : ''}`;
+
+        const response = await fetch(apiUrl, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        
+        // 处理API响应数据
+        let data;
+        if (result.result_code !== undefined) {
+          if (result.result_code !== 200) {
+            throw new Error(result.msg || 'API returned error');
+          }
+          data = result.data;
+        } else if (result.msg !== undefined) {
+          if (result.msg !== 'succeed') {
+            throw new Error(result.msg || 'API returned error');
+          }
+          data = result.data;
+        } else if (result.error) {
+          throw new Error(result.error);
+        } else {
+          data = result;
+        }
+
+        let animeList = [];
+        if (data && data.list) {
+          animeList = data.list;
+        }
+
+        const processedAnimes = animeList.map((anime: any) => ({
+          id: anime.id,
+          name: anime.name || 'Unknown',
+          title: anime.name || 'Unknown',
+          imagen: anime.imagen || '',
+          poster: anime.imagen || '',
+          type: anime.type === 'movie' ? 'movie' : 'series',
+          status: anime.status || 'ongoing',
+          genres: anime.genres || '',
+          rating: anime.rating || '0',
+          overview: anime.overview || '',
+        }));
+
+        setResults(processedAnimes);
       } catch (error) {
         setResults([]);
       } finally {

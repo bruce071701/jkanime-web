@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next';
-import { apiClient } from '@/lib/api';
+// Removed apiClient import - sitemap will use static URLs only
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://jkanimeflv.com';
 
