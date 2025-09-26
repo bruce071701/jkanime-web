@@ -85,8 +85,17 @@ class ApiClient {
         }
         
         try {
-            // 直接调用生产环境API
-            const response = await fetch(`${API_BASE_URL}/api/v1/anime/home`, {
+            // 使用本地 API 代理避免 CORS 问题
+            let baseUrl = '';
+            if (typeof window === 'undefined') {
+                // 服务器端
+                baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+            } else {
+                // 客户端
+                baseUrl = window.location.origin;
+            }
+            
+            const response = await fetch(`${baseUrl}/api/anime/home`, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -165,8 +174,17 @@ class ApiClient {
         }
         
         try {
-            // 直接调用生产环境API
-            const response = await fetch(`${API_BASE_URL}/api/v1/anime/detail/${animeId}`, {
+            // 使用本地 API 代理避免 CORS 问题
+            let baseUrl = '';
+            if (typeof window === 'undefined') {
+                // 服务器端
+                baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+            } else {
+                // 客户端
+                baseUrl = window.location.origin;
+            }
+            
+            const response = await fetch(`${baseUrl}/api/anime/detail/${animeId}`, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -232,8 +250,12 @@ class ApiClient {
         }
         
         try {
-            // 直接调用生产环境API
-            const response = await fetch(`${API_BASE_URL}/api/v1/anime/play/${episodeId}`, {
+            // 使用本地 API 代理避免 CORS 问题
+            const baseUrl = typeof window === 'undefined' 
+                ? (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000')
+                : window.location.origin;
+            
+            const response = await fetch(`${baseUrl}/api/anime/play/${episodeId}`, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -315,8 +337,12 @@ class ApiClient {
 
             const queryString = searchParams.toString();
             
-            // 直接调用生产环境API
-            const url = `${API_BASE_URL}/api/v1/anime/list${queryString ? `?${queryString}` : ''}`;
+            // 使用本地 API 代理避免 CORS 问题
+            const baseUrl = typeof window === 'undefined' 
+                ? (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000')
+                : window.location.origin;
+            
+            const url = `${baseUrl}/api/anime/list${queryString ? `?${queryString}` : ''}`;
             
             const response = await fetch(url, {
                 headers: {
@@ -484,8 +510,12 @@ class ApiClient {
         
         try {
             
-            // 直接调用生产环境API
-            const response = await fetch(`${API_BASE_URL}/api/v1/anime/genres`, {
+            // 使用本地 API 代理避免 CORS 问题
+            const baseUrl = typeof window === 'undefined' 
+                ? (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000')
+                : window.location.origin;
+            
+            const response = await fetch(`${baseUrl}/api/anime/genres`, {
                 headers: {
                     'Content-Type': 'application/json',
                 },

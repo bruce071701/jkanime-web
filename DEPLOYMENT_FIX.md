@@ -124,6 +124,36 @@ const response = await fetch(`${API_BASE_URL}/api/v1/anime/detail/${animeId}`);
 .map((anime: any, index: number) => {
 ```
 
+### 6. 环境变量和API调用修复
+
+**问题**: 详情页和列表页出现 "Internal Server Error"，API代理返回404
+
+**原因**: 
+- 缺少 `NEXT_PUBLIC_SITE_URL` 环境变量
+- 客户端和服务器端URL构建不一致
+
+**修复**:
+- 创建 `.env.local` 文件设置环境变量
+- 改进API客户端的URL构建逻辑
+
+**具体修改**:
+```typescript
+// 修复前
+const baseUrl = typeof window === 'undefined' 
+    ? (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000')
+    : '';
+
+// 修复后
+let baseUrl = '';
+if (typeof window === 'undefined') {
+    // 服务器端
+    baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+} else {
+    // 客户端
+    baseUrl = window.location.origin;
+}
+```
+
 ## 📋 部署检查清单
 
 - [x] TypeScript 类型错误已修复
@@ -135,6 +165,8 @@ const response = await fetch(`${API_BASE_URL}/api/v1/anime/detail/${animeId}`);
 - [x] NEXT_NOT_FOUND 错误已修复
 - [x] API调用直接连接生产环境
 - [x] Cloudflare Pages 构建成功 ✅
+- [x] 环境变量配置修复 ✅
+- [x] 详情页和列表页正常工作 ✅
 
 ## 🎯 下一步
 
