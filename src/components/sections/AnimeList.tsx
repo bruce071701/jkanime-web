@@ -37,7 +37,7 @@ export function AnimeList({ type, page, genre, sort, lang, basePath }: AnimeList
       setError(null);
       
       try {
-        // 直接调用生产环境API
+        // 使用Next.js API路由作为代理，避免CORS问题
         const searchParams = new URLSearchParams();
         if (type) {
           if (type === 'series') {
@@ -53,7 +53,8 @@ export function AnimeList({ type, page, genre, sort, lang, basePath }: AnimeList
         searchParams.append('size', '24');
         
         const queryString = searchParams.toString();
-        const url = `https://api-jk.funnyu.xyz/api/v1/anime/list${queryString ? `?${queryString}` : ''}`;
+        // 使用相对路径调用Next.js API路由
+        const url = `/api/anime/list${queryString ? `?${queryString}` : ''}`;
         
         console.log('AnimeList: Fetching from URL:', url);
         
@@ -61,6 +62,8 @@ export function AnimeList({ type, page, genre, sort, lang, basePath }: AnimeList
           headers: {
             'Content-Type': 'application/json',
           },
+          // 添加缓存控制
+          cache: 'no-store',
         });
         
         console.log('AnimeList: Response status:', response.status);
@@ -72,8 +75,27 @@ export function AnimeList({ type, page, genre, sort, lang, basePath }: AnimeList
         const result = await response.json();
         console.log('AnimeList: API response:', result);
         
+        // 处理API响应数据
+        let data;
+        if (result.result_code !== undefined) {
+          // Old format with result_code
+          if (result.result_code !== 200) {
+            throw new Error(result.msg || 'API returned error');
+          }
+          data = result.data;
+        } else if (result.msg !== undefined) {
+          // New format with msg
+          if (result.msg !== 'succeed') {
+            throw new Error(result.msg || 'API returned error');
+          }
+          data = result.data;
+        } else {
+          // Direct data response
+          data = result;
+        }
+        
         // 简单的数据处理
-        const animes = (result.data?.list || []).map((anime: any) => ({
+        const animes = (data?.list || []).map((anime: any) => ({
           id: anime.id,
           name: anime.name || 'Unknown',
           nameAlternative: anime.nameAlternative || '',
@@ -106,8 +128,8 @@ export function AnimeList({ type, page, genre, sort, lang, basePath }: AnimeList
           })() : undefined,
         }));
         
-        const total = result.data?.pagination?.totalCount || 0;
-        const size = result.data?.pagination?.pageSize || 24;
+        const total = data?.pagination?.totalCount || 0;
+        const size = data?.pagination?.pageSize || 24;
         const totalPages = Math.ceil(total / size);
 
         console.log('AnimeList: Processed data:', { animes: animes.length, total, totalPages });
@@ -127,7 +149,12 @@ export function AnimeList({ type, page, genre, sort, lang, basePath }: AnimeList
       }
     };
 
-    loadAnimes();
+    // 添加延迟确保组件完全挂载
+    const timer = setTimeout(() => {
+      loadAnimes();
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, [type, page, genre, sort, lang]);
 
   if (loading) {
