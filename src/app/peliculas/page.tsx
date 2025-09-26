@@ -1,31 +1,14 @@
+'use client';
+
 import { SimpleAnimeList } from '@/components/sections/SimpleAnimeList';
-import { generateListMetadata } from '@/lib/seo';
+import { useSearchParams } from 'next/navigation';
 
-export const runtime = 'edge';
-
-interface MoviesPageProps {
-  searchParams: Promise<{
-    page?: string;
-    genre?: string;
-    sort?: string;
-    lang?: string;
-  }>;
-}
-
-export async function generateMetadata({ searchParams }: MoviesPageProps) {
-  const resolvedSearchParams = await searchParams;
-  const page = parseInt(resolvedSearchParams.page || '1');
-  const genre = resolvedSearchParams.genre;
-  
-  return generateListMetadata('movie', genre, page);
-}
-
-export default async function MoviesPage({ searchParams }: MoviesPageProps) {
-  const resolvedSearchParams = await searchParams;
-  const page = parseInt(resolvedSearchParams.page || '1');
-  const genre = resolvedSearchParams.genre;
-  const sort = resolvedSearchParams.sort;
-  const lang = resolvedSearchParams.lang;
+export default function MoviesPage() {
+  const searchParams = useSearchParams();
+  const page = parseInt(searchParams.get('page') || '1');
+  const genre = searchParams.get('genre') || undefined;
+  const sort = searchParams.get('sort') || undefined;
+  const lang = searchParams.get('lang') || undefined;
 
   return (
     <div className="container-custom py-8">

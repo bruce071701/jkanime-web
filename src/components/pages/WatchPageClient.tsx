@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { notFound } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { apiClient } from '@/lib/api';
 import { Episode, Player } from '@/types/anime';
@@ -11,11 +11,9 @@ import { PlayerTabs } from '@/components/ui/PlayerTabs';
 import { addToWatchHistory } from '@/lib/watch-history';
 import { ArrowLeft, Play } from 'lucide-react';
 
-interface WatchPageClientProps {
-  episodeId: string;
-}
-
-export function WatchPageClient({ episodeId }: WatchPageClientProps) {
+export function WatchPageClient() {
+  const params = useParams();
+  const episodeId = params.episodeId as string;
   const [episode, setEpisode] = useState<Episode | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
@@ -29,7 +27,9 @@ export function WatchPageClient({ episodeId }: WatchPageClientProps) {
       try {
         const id = parseInt(episodeId);
         if (isNaN(id)) {
-          notFound();
+          setError('ID de episodio inválido');
+          setIsLoading(false);
+          return;
         }
 
         const data = await apiClient.getEpisodePlay(id);
