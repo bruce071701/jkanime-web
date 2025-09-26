@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { apiClient } from '@/lib/api';
+// Removed apiClient import to avoid Edge Runtime issues
 import { AnimeCard } from '@/components/ui/AnimeCard';
 import { Pagination } from '@/components/ui/Pagination';
 import { AnimeFilters } from '@/components/ui/AnimeFilters';
@@ -37,65 +37,50 @@ export function AnimeList({ type, page, genre, sort, lang, basePath }: AnimeList
       setError(null);
       
       try {
-        // 使用Next.js API路由作为代理，避免CORS问题
-        const searchParams = new URLSearchParams();
+        // 直接调用外部API，避免依赖问题
+        const params = new URLSearchParams();
         if (type) {
           if (type === 'series') {
-            searchParams.append('type', 'Serie');
+            params.append('type', 'Serie');
           } else if (type === 'movie') {
-            searchParams.append('type', 'movie');
+            params.append('type', 'movie');
           }
         }
-        if (page) searchParams.append('page', page.toString());
-        if (genre) searchParams.append('genre', genre);
-        if (sort) searchParams.append('sort', sort);
-        if (lang) searchParams.append('lang', lang);
-        searchParams.append('size', '24');
+        if (page) params.append('page', page.toString());
+        if (genre) params.append('genre', genre);
+        if (sort) params.append('sort', sort);
+        if (lang) params.append('lang', lang);
+        params.append('size', '24');
+
+        const queryString = params.toString();
+        const apiUrl = `https://api-jk.funnyu.xyz/api/v1/anime/list${queryString ? `?${queryString}` : ''}`;
+
+        console.log('AnimeList: Fetching from URL:', apiUrl);
         
-        const queryString = searchParams.toString();
-        // 使用相对路径调用Next.js API路由
-        const url = `/api/anime/list${queryString ? `?${queryString}` : ''}`;
-        
-        console.log('AnimeList: Fetching from URL:', url);
-        
-        const response = await fetch(url, {
+        const response = await fetch(apiUrl, {
           headers: {
             'Content-Type': 'application/json',
           },
-          // 添加缓存控制
-          cache: 'no-store',
         });
         
         console.log('AnimeList: Response status:', response.status);
         
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         
-        const result = await response.json();
-        console.log('AnimeList: API response:', result);
+        const data = await response.json();
+        console.log('AnimeList: API response:', data);
         
-        // 处理API响应数据
-        let data;
-        if (result.result_code !== undefined) {
-          // Old format with result_code
-          if (result.result_code !== 200) {
-            throw new Error(result.msg || 'API returned error');
-          }
-          data = result.data;
-        } else if (result.msg !== undefined) {
-          // New format with msg
-          if (result.msg !== 'succeed') {
-            throw new Error(result.msg || 'API returned error');
-          }
-          data = result.data;
-        } else {
-          // Direct data response
-          data = result;
+        let animeList = [];
+        let totalCount = 0;
+
+        if (data.data && data.data.list) {
+          animeList = data.data.list;
+          totalCount = data.data.pagination?.totalCount || 0;
         }
-        
-        // 简单的数据处理
-        const animes = (data?.list || []).map((anime: any) => ({
+
+        const processedAnimes = animeList.map((anime: any) => ({
           id: anime.id,
           name: anime.name || 'Unknown',
           nameAlternative: anime.nameAlternative || '',
@@ -127,19 +112,13 @@ export function AnimeList({ type, page, genre, sort, lang, basePath }: AnimeList
             }
           })() : undefined,
         }));
-        
-        const total = data?.pagination?.totalCount || 0;
-        const size = data?.pagination?.pageSize || 24;
-        const totalPages = Math.ceil(total / size);
 
-        console.log('AnimeList: Processed data:', { animes: animes.length, total, totalPages });
-
-        setAnimes(animes);
+        setAnimes(processedAnimes);
         setPagination({
-          total,
-          page,
-          size,
-          totalPages
+          total: totalCount,
+          page: page,
+          size: 24,
+          totalPages: Math.ceil(totalCount / 24)
         });
       } catch (err) {
         console.error('AnimeList: Error loading animes:', err);

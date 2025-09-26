@@ -1,27 +1,10 @@
-import { Suspense } from 'react';
+'use client';
+
+import { useSearchParams } from 'next/navigation';
 import { AnimeList } from '@/components/sections/AnimeList';
-import { AnimeListSkeleton } from '@/components/ui/AnimeListSkeleton';
-import { generateListMetadata } from '@/lib/seo';
 import Link from 'next/link';
 
 export const runtime = 'edge';
-
-interface GenresPageProps {
-  searchParams: Promise<{
-    page?: string;
-    genre?: string;
-    sort?: string;
-    lang?: string;
-  }>;
-}
-
-export async function generateMetadata({ searchParams }: GenresPageProps) {
-  const resolvedSearchParams = await searchParams;
-  const page = parseInt(resolvedSearchParams.page || '1');
-  const genre = resolvedSearchParams.genre;
-  
-  return generateListMetadata('all', genre, page);
-}
 
 // Anime genres based on actual API data
 const animeGenres = [
@@ -43,9 +26,12 @@ const animeGenres = [
   { name: 'Militar', slug: 'Militar', color: 'bg-amber-700', count: '2+' },
 ];
 
-export default async function GenresPage({ searchParams }: GenresPageProps) {
-  const resolvedSearchParams = await searchParams;
-  const selectedGenre = resolvedSearchParams.genre;
+export default function GenresPage() {
+  const searchParams = useSearchParams();
+  const selectedGenre = searchParams.get('genre');
+  const page = parseInt(searchParams.get('page') || '1');
+  const sort = searchParams.get('sort');
+  const lang = searchParams.get('lang');
 
   if (selectedGenre) {
     // If a genre is selected, show anime list for that genre
@@ -68,15 +54,13 @@ export default async function GenresPage({ searchParams }: GenresPageProps) {
           </p>
         </div>
 
-        <Suspense fallback={<AnimeListSkeleton />}>
-          <AnimeList
-            page={parseInt(resolvedSearchParams.page || '1')}
-            genre={selectedGenre}
-            sort={resolvedSearchParams.sort as 'latest' | 'popular' | 'rating' | undefined}
-            lang={resolvedSearchParams.lang}
-            basePath="/generos"
-          />
-        </Suspense>
+        <AnimeList
+          page={page}
+          genre={selectedGenre || undefined}
+          sort={sort as 'latest' | 'popular' | 'rating' | undefined}
+          lang={lang || undefined}
+          basePath="/generos"
+        />
       </div>
     );
   }
