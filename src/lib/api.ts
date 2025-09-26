@@ -3,28 +3,19 @@ import { mockApiClient } from './mock-api';
 
 // Use different URLs for server-side and client-side
 const getApiBaseUrl = () => {
-    // 优先使用环境变量，如果没有设置则使用生产环境 API
-    const envApiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.API_URL;
-    
-    // 如果环境变量存在且不为空，使用环境变量
-    if (envApiUrl && envApiUrl.trim() !== '') {
-        return envApiUrl;
-    }
-    
-    // 否则使用生产环境 API
+    // 直接使用生产环境 API
     return 'https://api-jk.funnyu.xyz';
 };
 
 const API_BASE_URL = getApiBaseUrl();
-const USE_MOCK_API = process.env.USE_MOCK_API === 'true' || process.env.NEXT_PUBLIC_USE_MOCK_API === 'true';
+const USE_MOCK_API = false; // 强制使用生产环境API
 
-// 开发环境下显示 API 配置信息
-if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
-    console.log('🔧 API Configuration:');
-    console.log('  API_BASE_URL:', API_BASE_URL);
-    console.log('  USE_MOCK_API:', USE_MOCK_API);
-    console.log('  NODE_ENV:', process.env.NODE_ENV);
+// Next.js 15 兼容性：确保在客户端环境中正确初始化
+if (typeof window !== 'undefined') {
+    // 客户端初始化
 }
+
+
 
 class ApiClient {
     private async request<T>(endpoint: string): Promise<T> {
@@ -86,26 +77,32 @@ class ApiClient {
 
     async getHomeData(): Promise<HomeData> {
         if (USE_MOCK_API) {
-            return mockApiClient.getHomeData();
+            try {
+                return await mockApiClient.getHomeData();
+            } catch (error) {
+                throw new Error('Error loading mock data');
+            }
         }
         
         try {
-            
-            // Use Next.js API proxy to avoid CORS issues
-            const baseUrl = typeof window === 'undefined' 
-                ? (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000')
-                : '';
-            const response = await fetch(`${baseUrl}/api/anime/home`, {
+            // 直接调用生产环境API
+            const response = await fetch(`${API_BASE_URL}/api/v1/anime/home`, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
             });
             
             if (!response.ok) {
-                throw new Error(`Proxy Error: ${response.status} ${response.statusText}`);
+                const errorText = await response.text().catch(() => 'Unknown error');
+                throw new Error(`API Error: ${response.status} - ${errorText}`);
             }
             
-            const result = await response.json();
+            let result;
+            try {
+                result = await response.json();
+            } catch (jsonError) {
+                throw new Error('Invalid JSON response from server');
+            }
             
             if (result.error) {
                 throw new Error(result.error);
@@ -130,10 +127,33 @@ class ApiClient {
                 data = result;
             }
             
-            return {
-                latestMovies: data.latestMovies.map(this.transformAnime),
-                latestSeries: data.latestSeries.map(this.transformAnime)
+            // 确保数据存在并有正确的结构
+            if (!data || typeof data !== 'object') {
+                throw new Error('Invalid data format received from API');
+            }
+            
+            // 安全处理数组数据
+            const latestMovies = Array.isArray(data.latestMovies) ? data.latestMovies : [];
+            const latestSeries = Array.isArray(data.latestSeries) ? data.latestSeries : [];
+            
+            const processedData = {
+                latestMovies: latestMovies.map((anime, index) => {
+                    try {
+                        return this.transformAnime(anime);
+                    } catch (error) {
+                        return null;
+                    }
+                }).filter(Boolean),
+                latestSeries: latestSeries.map((anime, index) => {
+                    try {
+                        return this.transformAnime(anime);
+                    } catch (error) {
+                        return null;
+                    }
+                }).filter(Boolean)
             };
+            
+            return processedData;
         } catch (error) {
             throw error;
         }
@@ -145,12 +165,8 @@ class ApiClient {
         }
         
         try {
-            
-            // Use Next.js API proxy to avoid CORS issues
-            const baseUrl = typeof window === 'undefined' 
-                ? (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000')
-                : '';
-            const response = await fetch(`${baseUrl}/api/anime/detail/${animeId}`, {
+            // 直接调用生产环境API
+            const response = await fetch(`${API_BASE_URL}/api/v1/anime/detail/${animeId}`, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -185,13 +201,24 @@ class ApiClient {
                 data = result;
             }
             
-            const transformedAnime = this.transformAnime(data.anime);
-            transformedAnime.episodes = data.episodes?.map((ep: any) => ({
+            // 确保数据存在
+            if (!data || typeof data !== 'object') {
+                throw new Error('Invalid anime detail data received from API');
+            }
+            
+            // Ensure we have anime data
+            const animeData = data.anime || data;
+            if (!animeData || !animeData.id) {
+                throw new Error('No anime data found in API response');
+            }
+            
+            const transformedAnime = this.transformAnime(animeData);
+            transformedAnime.episodes = (data.episodes || []).map((ep: any) => ({
                 ...ep,
-                episodeNumber: ep.number,
-                title: ep.title || `Episodio ${ep.number}`
-            })) || [];
-            transformedAnime.totalEpisodes = data.totalEpisodes || data.currentEpisodes;
+                episodeNumber: ep.number || ep.episodeNumber,
+                title: ep.title || `Episodio ${ep.number || ep.episodeNumber || 'N/A'}`
+            }));
+            transformedAnime.totalEpisodes = data.totalEpisodes || data.currentEpisodes || 0;
             
             return transformedAnime;
         } catch (error) {
@@ -205,12 +232,8 @@ class ApiClient {
         }
         
         try {
-            
-            // Use Next.js API proxy to avoid CORS issues
-            const baseUrl = typeof window === 'undefined' 
-                ? (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000')
-                : '';
-            const response = await fetch(`${baseUrl}/api/anime/play/${episodeId}`, {
+            // 直接调用生产环境API
+            const response = await fetch(`${API_BASE_URL}/api/v1/anime/play/${episodeId}`, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -292,11 +315,8 @@ class ApiClient {
 
             const queryString = searchParams.toString();
             
-            // Use Next.js API proxy to avoid CORS issues
-            const baseUrl = typeof window === 'undefined' 
-                ? (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000')
-                : '';
-            const url = `${baseUrl}/api/anime/list${queryString ? `?${queryString}` : ''}`;
+            // 直接调用生产环境API
+            const url = `${API_BASE_URL}/api/v1/anime/list${queryString ? `?${queryString}` : ''}`;
             
             const response = await fetch(url, {
                 headers: {
@@ -348,16 +368,41 @@ class ApiClient {
     }
 
     private transformAnime = (apiAnime: any): Anime => {
+        // 确保 apiAnime 存在
+        if (!apiAnime || typeof apiAnime !== 'object') {
+            throw new Error('Invalid anime data received from API');
+        }
+        
+        // Ensure we have required fields
+        if (!apiAnime.id) {
+            throw new Error('Anime data missing required ID field');
+        }
+        
         const transformedAnime: Anime = {
             ...apiAnime,
-            type: ['serie', 'tv', 'series'].includes(apiAnime.type?.toLowerCase()) ? 'series' : 'movie',
+            // Ensure we have a name
+            name: apiAnime.name || apiAnime.title || 'Unknown Title',
+            nameAlternative: apiAnime.nameAlternative || apiAnime.name || apiAnime.title || '',
+            type: ['serie', 'tv', 'series', 'Serie'].includes(apiAnime.type) ? 'series' : 'movie',
             status: apiAnime.status === '0' || apiAnime.status === 0 ? 'ongoing' : 'completed',
             // 兼容性字段
-            title: apiAnime.name,
-            description: apiAnime.overview,
-            poster: apiAnime.imagen,
-            banner: apiAnime.imagenCapitulo || apiAnime.imagen,
+            title: apiAnime.name || apiAnime.title || 'Unknown Title',
+            description: apiAnime.overview || apiAnime.description || '',
+            poster: apiAnime.imagen || apiAnime.poster || '',
+            banner: apiAnime.imagenCapitulo || apiAnime.imagen || apiAnime.banner || '',
             year: apiAnime.aired ? this.extractYear(apiAnime.aired) : undefined,
+            // Ensure we have default values for required fields
+            slug: apiAnime.slug || '',
+            imagen: apiAnime.imagen || '',
+            imagenCapitulo: apiAnime.imagenCapitulo || apiAnime.imagen || '',
+            voteAverage: apiAnime.voteAverage || '',
+            visitas: apiAnime.visitas || 0,
+            overview: apiAnime.overview || apiAnime.description || '',
+            aired: apiAnime.aired || '',
+            createdAt: apiAnime.createdAt || '',
+            lang: apiAnime.lang || 'sub',
+            episodeCount: apiAnime.episodeCount || '',
+            latestEpisode: apiAnime.latestEpisode || '',
         };
 
         // Handle genres - convert string to array if needed
@@ -439,11 +484,8 @@ class ApiClient {
         
         try {
             
-            // Use Next.js API proxy to avoid CORS issues
-            const baseUrl = typeof window === 'undefined' 
-                ? (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000')
-                : '';
-            const response = await fetch(`${baseUrl}/api/anime/genres`, {
+            // 直接调用生产环境API
+            const response = await fetch(`${API_BASE_URL}/api/v1/anime/genres`, {
                 headers: {
                     'Content-Type': 'application/json',
                 },

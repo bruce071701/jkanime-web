@@ -89,7 +89,7 @@ export function addToWatchHistory(
     setCookie(HISTORY_COOKIE_NAME, historyJson, 30); // 保存30天
     
   } catch (error) {
-    console.error('Failed to save watch history:', error);
+    // Silently handle error
   }
 }
 
@@ -112,7 +112,7 @@ export function updateWatchProgress(
     setCookie(HISTORY_COOKIE_NAME, historyJson, 30);
     
   } catch (error) {
-    console.error('Failed to update watch progress:', error);
+    // Silently handle error
   }
 }
 
@@ -128,7 +128,7 @@ export function removeFromWatchHistory(animeId: number, episodeId: number): void
     setCookie(HISTORY_COOKIE_NAME, historyJson, 30);
     
   } catch (error) {
-    console.error('Failed to remove from watch history:', error);
+    // Silently handle error
   }
 }
 
@@ -137,7 +137,7 @@ export function clearWatchHistory(): void {
   try {
     setCookie(HISTORY_COOKIE_NAME, '', -1); // 设置过期时间为过去，删除cookie
   } catch (error) {
-    console.error('Failed to clear watch history:', error);
+    // Silently handle error
   }
 }
 

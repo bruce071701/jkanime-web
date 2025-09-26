@@ -1,4 +1,6 @@
-import { Suspense } from 'react';
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { apiClient } from '@/lib/api';
 import { Filter, SortAsc, Languages } from 'lucide-react';
@@ -11,9 +13,36 @@ interface AnimeFiltersProps {
   basePath: string;
 }
 
-async function GenreFilter({ currentGenre, basePath, currentSort, currentLang }: AnimeFiltersProps) {
-  try {
-    const genres = await apiClient.getGenres();
+function GenreFilter({ currentGenre, basePath, currentSort, currentLang }: AnimeFiltersProps) {
+  const [genres, setGenres] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadGenres = () => {
+      apiClient.getGenres()
+        .then((genresData) => {
+          setGenres(genresData);
+        })
+        .catch(() => {
+          setGenres([]);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    };
+
+    loadGenres();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex flex-wrap gap-2">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div key={i} className="h-8 w-20 bg-gray-700 rounded animate-pulse"></div>
+        ))}
+      </div>
+    );
+  }
 
     const buildGenreUrl = (genre?: string) => {
       const params = new URLSearchParams();
@@ -53,13 +82,6 @@ async function GenreFilter({ currentGenre, basePath, currentSort, currentLang }:
         ))}
       </div>
     );
-  } catch (error) {
-    return (
-      <div className="text-gray-400 text-sm">
-        Error al cargar géneros
-      </div>
-    );
-  }
 }
 
 export function AnimeFilters({ currentGenre, currentSort, currentLang, basePath }: AnimeFiltersProps) {
@@ -89,21 +111,21 @@ export function AnimeFilters({ currentGenre, currentSort, currentLang, basePath 
   };
 
   return (
-    <div className="bg-gray-800 rounded-lg p-4 mb-6 space-y-4">
+    <div className="bg-gray-800 rounded-lg p-3 md:p-4 mb-6 space-y-4">
       {/* Language Filter */}
       <div>
-        <div className="flex items-center mb-3">
+        <div className="flex items-center mb-2 md:mb-3">
           <Languages className="h-4 w-4 mr-2" />
-          <span className="font-medium">Idioma:</span>
+          <span className="font-medium text-sm md:text-base">Idioma:</span>
         </div>
         
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1 md:gap-2">
           {languageOptions.map((option) => (
             <Link
               key={option.value}
               href={buildUrl(undefined, option.value)}
               className={cn(
-                'px-3 py-1 rounded-full text-sm transition-colors flex items-center gap-1',
+                'px-2 md:px-3 py-1 rounded-full text-xs md:text-sm transition-colors flex items-center gap-1',
                 (currentLang || '') === option.value
                   ? 'bg-primary-600 text-white'
                   : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
@@ -148,20 +170,12 @@ export function AnimeFilters({ currentGenre, currentSort, currentLang, basePath 
           <span className="font-medium">Géneros:</span>
         </div>
         
-        <Suspense fallback={
-          <div className="flex gap-2">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="h-7 w-20 bg-gray-700 rounded-full animate-pulse" />
-            ))}
-          </div>
-        }>
-          <GenreFilter
-            currentGenre={currentGenre}
-            currentSort={currentSort}
-            currentLang={currentLang}
-            basePath={basePath}
-          />
-        </Suspense>
+        <GenreFilter
+          currentGenre={currentGenre}
+          currentSort={currentSort}
+          currentLang={currentLang}
+          basePath={basePath}
+        />
       </div>
     </div>
   );

@@ -14,7 +14,23 @@ const nextConfig = {
     unoptimized: true // Cloudflare Pages 需要
   },
   
-
+  // Next.js 15 兼容性设置
+  experimental: {
+    reactCompiler: false,
+    ppr: false,
+    dynamicIO: false,
+  },
+  
+  // 服务器外部包配置
+  serverExternalPackages: [],
+  
+  // 编译器选项
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
+  
+  // 强制客户端渲染某些组件
+  transpilePackages: [],
   
   // 压缩和优化
   compress: true,

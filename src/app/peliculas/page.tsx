@@ -1,6 +1,4 @@
-import { Suspense } from 'react';
 import { AnimeList } from '@/components/sections/AnimeList';
-import { AnimeListSkeleton } from '@/components/ui/AnimeListSkeleton';
 import { generateListMetadata } from '@/lib/seo';
 
 export const runtime = 'edge';
@@ -38,16 +36,14 @@ export default async function MoviesPage({ searchParams }: MoviesPageProps) {
         </p>
       </div>
 
-      <Suspense fallback={<AnimeListSkeleton />}>
-        <AnimeList
-          type="movie"
-          page={page}
-          genre={genre}
-          sort={sort}
-          lang={lang}
-          basePath="/peliculas"
-        />
-      </Suspense>
+      <AnimeList
+        type="movie"
+        page={page}
+        genre={genre}
+        sort={sort}
+        lang={lang}
+        basePath="/peliculas"
+      />
     </div>
   );
 }

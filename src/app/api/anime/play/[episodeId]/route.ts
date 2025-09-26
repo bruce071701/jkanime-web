@@ -13,7 +13,7 @@ export async function GET(
   try {
     const resolvedParams = await params;
     const episodeId = resolvedParams.episodeId;
-    console.log('API Proxy: Fetching episode play data for ID', episodeId);
+
     
     const response = await fetch(`${API_BASE_URL}/api/v1/anime/play/${episodeId}`, {
       headers: {
@@ -23,7 +23,7 @@ export async function GET(
     });
 
     if (!response.ok) {
-      console.error('API Proxy Error:', response.status, response.statusText);
+
       return NextResponse.json(
         { error: 'Failed to fetch episode data', status: response.status },
         { status: response.status }
@@ -31,11 +31,11 @@ export async function GET(
     }
 
     const data = await response.json();
-    console.log('API Proxy: Successfully fetched episode data');
+
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error('API Proxy Error:', error);
+
     return NextResponse.json(
       { error: 'Failed to fetch episode data', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }

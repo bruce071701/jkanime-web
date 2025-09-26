@@ -60,7 +60,7 @@ export function WatchPageClient({ episodeId }: WatchPageClientProps) {
             // Add to watch history when episode loads
             addToWatchHistory(animeData, data.episode);
           } catch (animeErr) {
-            console.warn('Could not load anime details:', animeErr);
+            // Silently handle anime details loading error
           }
         }
       } catch (err) {
@@ -104,18 +104,19 @@ export function WatchPageClient({ episodeId }: WatchPageClientProps) {
     <div className="min-h-screen bg-black">
       {/* Header */}
       <div className="bg-gray-900 border-b border-gray-800">
-        <div className="container-custom py-4">
+        <div className="container-custom py-3 md:py-4 px-4">
           <div className="flex items-center justify-between">
             <Link
               href={`/anime/${episode.animeId}`}
-              className="flex items-center text-gray-400 hover:text-white transition-colors"
+              className="flex items-center text-gray-400 hover:text-white transition-colors text-sm md:text-base"
             >
-              <ArrowLeft className="h-5 w-5 mr-2" />
-              Volver a detalles
+              <ArrowLeft className="h-4 w-4 md:h-5 md:w-5 mr-1 md:mr-2" />
+              <span className="hidden sm:inline">Volver a detalles</span>
+              <span className="sm:hidden">Volver</span>
             </Link>
             
             <div className="text-right">
-              <h1 className="text-lg font-semibold">
+              <h1 className="text-base md:text-lg font-semibold">
                 Episodio {episode.episodeNumber}
               </h1>
               {episode.title && (

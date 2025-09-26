@@ -30,26 +30,39 @@ interface AnimeDetailPageProps {
 
 export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) {
   const resolvedParams = await params;
+  const animeId = parseInt(resolvedParams.id);
+  
+  if (isNaN(animeId)) {
+    notFound();
+  }
+
+  let anime;
   try {
-    const animeId = parseInt(resolvedParams.id);
-    if (isNaN(animeId)) {
+    anime = await apiClient.getAnimeDetail(animeId);
+    
+    // Validate that we have the essential data
+    if (!anime || !anime.id) {
+      console.error('Invalid anime data received:', anime);
       notFound();
     }
+  } catch (error) {
+    console.error('Error fetching anime detail:', error);
+    notFound();
+  }
 
-    const anime = await apiClient.getAnimeDetail(animeId);
-    const structuredData = generateStructuredData(anime);
+  const structuredData = generateStructuredData(anime);
 
-    return (
-      <>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(structuredData),
-          }}
-        />
-        <div className="min-h-screen">
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(structuredData),
+        }}
+      />
+      <div className="min-h-screen">
         {/* Hero Section */}
-        <div className="relative h-96 md:h-[500px] overflow-hidden">
+        <div className="relative h-64 sm:h-80 md:h-96 lg:h-[500px] overflow-hidden">
           {(anime.imagenCapitulo || anime.imagen) && (
             <Image
               src={anime.imagenCapitulo || anime.imagen}
@@ -62,7 +75,7 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
           <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/60 to-transparent" />
         </div>
 
-        <div className="container-custom -mt-32 relative z-10">
+        <div className="container-custom -mt-20 sm:-mt-24 md:-mt-32 relative z-10 px-4">
           <Breadcrumbs
             items={[
               { 
@@ -73,10 +86,10 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
             ]}
           />
           
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
             {/* Poster */}
             <div className="lg:col-span-1">
-              <div className="relative aspect-[3/4] max-w-sm mx-auto lg:mx-0">
+              <div className="relative aspect-[3/4] max-w-xs sm:max-w-sm mx-auto lg:mx-0">
                 <Image
                   src={anime.imagen || '/placeholder-anime.jpg'}
                   alt={anime.name || anime.nameAlternative || 'Anime'}
@@ -87,12 +100,14 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
             </div>
 
             {/* Content */}
-            <div className="lg:col-span-2 space-y-6">
+            <div className="lg:col-span-2 space-y-4 lg:space-y-6">
               <div>
-                <h1 className="text-3xl md:text-4xl font-bold mb-4">{anime.name || anime.nameAlternative || 'Anime'}</h1>
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 md:mb-4 leading-tight">
+                  {anime.name || anime.nameAlternative || anime.title || 'Anime'}
+                </h1>
                 
                 {/* Meta info */}
-                <div className="flex flex-wrap gap-4 mb-6 text-sm">
+                <div className="flex flex-wrap gap-2 md:gap-4 mb-4 md:mb-6 text-xs md:text-sm">
                   <div className="flex items-center bg-gray-800 px-3 py-1 rounded">
                     <Tag className="h-4 w-4 mr-2" />
                     {anime.type === 'series' ? 'Serie' : 'Película'}
@@ -101,7 +116,13 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
                   {(anime.year || anime.aired) && (
                     <div className="flex items-center bg-gray-800 px-3 py-1 rounded">
                       <Calendar className="h-4 w-4 mr-2" />
-                      {formatYear(anime.year || (anime.aired ? new Date(anime.aired).getFullYear() : undefined))}
+                      {formatYear(anime.year || (anime.aired ? (() => {
+                        try {
+                          return new Date(anime.aired).getFullYear();
+                        } catch {
+                          return undefined;
+                        }
+                      })() : undefined))}
                     </div>
                   )}
                   
@@ -114,9 +135,9 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
                   
                   <div className="flex items-center bg-gray-800 px-3 py-1 rounded">
                     <span className={`w-2 h-2 rounded-full mr-2 ${
-                      anime.status === 'completed' ? 'bg-green-500' : 'bg-yellow-500'
+                      anime.status === 'completed' || anime.status === '1' ? 'bg-green-500' : 'bg-yellow-500'
                     }`} />
-                    {anime.status === 'completed' ? 'Completo' : 'En emisión'}
+                    {anime.status === 'completed' || anime.status === '1' ? 'Completo' : 'En emisión'}
                   </div>
                   
                   {anime.lang && (
@@ -138,14 +159,14 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
                 {/* Genres */}
                 {anime.genres && (
                   <div className="flex flex-wrap gap-2 mb-6">
-                    {(Array.isArray(anime.genres) ? anime.genres : anime.genres.split(',')).map((genre) => (
+                    {(Array.isArray(anime.genres) ? anime.genres : anime.genres.split(',')).map((genre, index) => (
                       <Link
-                        key={genre}
-                        href={`/series?genre=${encodeURIComponent(genre)}`}
+                        key={`${genre}-${index}`}
+                        href={`/series?genre=${encodeURIComponent(genre.trim())}`}
                         className="px-3 py-1 bg-primary-600 hover:bg-primary-700 text-white text-sm rounded-full transition-colors duration-200 hover:scale-105 transform"
-                        title={`Ver más anime de ${genre}`}
+                        title={`Ver más anime de ${genre.trim()}`}
                       >
-                        {genre}
+                        {genre.trim()}
                       </Link>
                     ))}
                   </div>
@@ -281,7 +302,4 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
         </div>
       </>
     );
-  } catch (error) {
-    notFound();
-  }
 }

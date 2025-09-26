@@ -14,19 +14,35 @@ export function HomeContent() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const loadHomeData = async () => {
-      try {
-        setLoading(true);
-        const data = await apiClient.getHomeData();
-        setHomeData(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Error desconocido');
-      } finally {
-        setLoading(false);
-      }
+    let isMounted = true;
+    
+    const loadHomeData = () => {
+      setLoading(true);
+      setError(null);
+      
+      apiClient.getHomeData()
+        .then((data) => {
+          if (isMounted) {
+            setHomeData(data);
+          }
+        })
+        .catch((err) => {
+          if (isMounted) {
+            setError(err instanceof Error ? err.message : 'Error desconocido');
+          }
+        })
+        .finally(() => {
+          if (isMounted) {
+            setLoading(false);
+          }
+        });
     };
 
     loadHomeData();
+    
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   if (loading) {
@@ -136,7 +152,7 @@ export function HomeContent() {
           </div>
           
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-            {homeData.latestMovies.slice(0, 12).map((anime) => (
+            {homeData.latestMovies.slice(0, 18).map((anime) => (
               <AnimeCard key={anime.id} anime={anime} />
             ))}
           </div>
@@ -161,7 +177,7 @@ export function HomeContent() {
           </div>
           
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-            {homeData.latestSeries.slice(0, 12).map((anime) => (
+            {homeData.latestSeries.slice(0, 18).map((anime) => (
               <AnimeCard key={anime.id} anime={anime} />
             ))}
           </div>

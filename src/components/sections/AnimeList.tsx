@@ -29,35 +29,36 @@ export function AnimeList({ type, page, genre, sort, lang, basePath }: AnimeList
   });
 
   useEffect(() => {
-    const loadAnimes = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const response = await apiClient.getAnimeList({
-          type,
-          page,
-          genre,
-          sort: sort || 'latest',
-          lang,
-          size: 24
-        });
+    const loadAnimes = () => {
+      setLoading(true);
+      setError(null);
+      
+      apiClient.getAnimeList({
+        type,
+        page,
+        genre,
+        sort: sort || 'latest',
+        lang,
+        size: 24
+      })
+        .then((response) => {
+          const { animes: responseAnimes, total, size } = response;
+          const totalPages = Math.ceil(total / size);
 
-        const { animes: responseAnimes, total, size } = response;
-        const totalPages = Math.ceil(total / size);
-
-        setAnimes(responseAnimes);
-        setPagination({
-          total,
-          page,
-          size,
-          totalPages
+          setAnimes(responseAnimes);
+          setPagination({
+            total,
+            page,
+            size,
+            totalPages
+          });
+        })
+        .catch((err) => {
+          setError(err instanceof Error ? err.message : 'Error desconocido');
+        })
+        .finally(() => {
+          setLoading(false);
         });
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Error desconocido');
-      } finally {
-        setLoading(false);
-      }
     };
 
     loadAnimes();

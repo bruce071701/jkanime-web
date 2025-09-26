@@ -85,6 +85,28 @@ NEXT_PUBLIC_API_BASE_URL=https://api-jk.funnyu.xyz
 USE_MOCK_API=false
 ```
 
+### 4. API调用优化 (`src/lib/api.ts`)
+
+**问题**: NEXT_NOT_FOUND 错误，通过本地API代理可能导致额外问题
+
+**修复**:
+- 移除本地API代理调用
+- 直接调用生产环境API `https://api-jk.funnyu.xyz`
+- 增强数据验证和错误处理
+- 添加更多防御性编程
+
+**具体修改**:
+```typescript
+// 修复前
+const baseUrl = typeof window === 'undefined' 
+    ? (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000')
+    : '';
+const response = await fetch(`${baseUrl}/api/anime/detail/${animeId}`);
+
+// 修复后
+const response = await fetch(`${API_BASE_URL}/api/v1/anime/detail/${animeId}`);
+```
+
 ## 📋 部署检查清单
 
 - [x] TypeScript 类型错误已修复
@@ -93,6 +115,8 @@ USE_MOCK_API=false
 - [x] 环境变量配置正确
 - [x] 所有字段都有适当的后备值
 - [x] 兼容性字段映射正确
+- [x] NEXT_NOT_FOUND 错误已修复
+- [x] API调用直接连接生产环境
 
 ## 🎯 下一步
 
@@ -107,6 +131,8 @@ USE_MOCK_API=false
 - **用户体验**: 即使 API 返回不完整数据也能正常显示
 - **稳定性**: 减少了运行时错误的可能性
 - **兼容性**: 支持新旧 API 字段格式
+- **性能**: 直接API调用减少了延迟和中间层错误
+- **可靠性**: 消除了NEXT_NOT_FOUND错误
 
 ---
 
