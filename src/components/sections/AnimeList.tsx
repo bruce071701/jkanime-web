@@ -33,14 +33,25 @@ export function AnimeList({ type, page, genre, sort, lang, basePath }: AnimeList
       setLoading(true);
       setError(null);
       
-      apiClient.getAnimeList({
-        type,
-        page,
-        genre,
-        sort: sort || 'latest',
-        lang,
-        size: 24
-      })
+      // 直接调用生产环境API
+      const searchParams = new URLSearchParams();
+      if (type) {
+        if (type === 'series') {
+          searchParams.append('type', 'Serie');
+        } else if (type === 'movie') {
+          searchParams.append('type', 'movie');
+        }
+      }
+      if (page) searchParams.append('page', page.toString());
+      if (genre) searchParams.append('genre', genre);
+      if (sort) searchParams.append('sort', sort);
+      if (lang) searchParams.append('lang', lang);
+      searchParams.append('size', '24');
+      
+      const queryString = searchParams.toString();
+      const url = `https://api-jk.funnyu.xyz/api/v1/anime/list${queryString ? `?${queryString}` : ''}`;
+      
+      fetch(url)
         .then((response) => {
           const { animes: responseAnimes, total, size } = response;
           const totalPages = Math.ceil(total / size);

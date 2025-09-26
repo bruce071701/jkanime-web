@@ -85,17 +85,8 @@ class ApiClient {
         }
         
         try {
-            // 使用本地 API 代理避免 CORS 问题
-            let baseUrl = '';
-            if (typeof window === 'undefined') {
-                // 服务器端
-                baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
-            } else {
-                // 客户端 - 使用相对路径
-                baseUrl = '';
-            }
-            
-            const response = await fetch(`${baseUrl}/api/anime/home`, {
+            // 直接调用生产环境API
+            const response = await fetch('https://api-jk.funnyu.xyz/api/v1/anime/home', {
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -176,17 +167,8 @@ class ApiClient {
         }
         
         try {
-            // 使用本地 API 代理避免 CORS 问题
-            let baseUrl = '';
-            if (typeof window === 'undefined') {
-                // 服务器端
-                baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
-            } else {
-                // 客户端 - 使用相对路径
-                baseUrl = '';
-            }
-            
-            const response = await fetch(`${baseUrl}/api/anime/detail/${animeId}`, {
+            // 直接调用生产环境API
+            const response = await fetch(`https://api-jk.funnyu.xyz/api/v1/anime/detail/${animeId}`, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -252,12 +234,8 @@ class ApiClient {
         }
         
         try {
-            // 使用本地 API 代理避免 CORS 问题
-            const baseUrl = typeof window === 'undefined' 
-                ? (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000')
-                : '';
-            
-            const response = await fetch(`${baseUrl}/api/anime/play/${episodeId}`, {
+            // 直接调用生产环境API
+            const response = await fetch(`https://api-jk.funnyu.xyz/api/v1/anime/play/${episodeId}`, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -339,12 +317,8 @@ class ApiClient {
 
             const queryString = searchParams.toString();
             
-            // 使用本地 API 代理避免 CORS 问题
-            const baseUrl = typeof window === 'undefined' 
-                ? (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000')
-                : '';
-            
-            const url = `${baseUrl}/api/anime/list${queryString ? `?${queryString}` : ''}`;
+            // 直接调用生产环境API
+            const url = `https://api-jk.funnyu.xyz/api/v1/anime/list${queryString ? `?${queryString}` : ''}`;
             
             const response = await fetch(url, {
                 headers: {
@@ -513,12 +487,8 @@ class ApiClient {
         
         try {
             
-            // 使用本地 API 代理避免 CORS 问题
-            const baseUrl = typeof window === 'undefined' 
-                ? (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000')
-                : '';
-            
-            const response = await fetch(`${baseUrl}/api/anime/genres`, {
+            // 直接调用生产环境API
+            const response = await fetch('https://api-jk.funnyu.xyz/api/v1/anime/genres', {
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -570,11 +540,37 @@ class ApiClient {
             size: size.toString()
         });
 
-        const response = await this.request<{keyword: string; list: Anime[]; pagination: any}>(`/api/v1/anime/search?${searchParams}`);
+        const response = await fetch(`https://api-jk.funnyu.xyz/api/v1/anime/search?${searchParams}`, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        
+        if (!response.ok) {
+            throw new Error(`API Error: ${response.status} - ${response.statusText}`);
+        }
+        
+        const result = await response.json();
+        
+        // Handle different API response formats
+        let data;
+        if (result.result_code !== undefined) {
+            if (result.result_code !== 200) {
+                throw new Error(result.msg || 'API returned error');
+            }
+            data = result.data;
+        } else if (result.msg !== undefined) {
+            if (result.msg !== 'succeed') {
+                throw new Error(result.msg || 'API returned error');
+            }
+            data = result.data;
+        } else {
+            data = result;
+        }
         
         return {
-            animes: response.list.map((anime: any) => this.transformAnime(anime)),
-            total: response.pagination.totalCount
+            animes: data.list.map((anime: any) => this.transformAnime(anime)),
+            total: data.pagination.totalCount
         };
     }
 }

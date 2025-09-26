@@ -21,18 +21,14 @@ export function HomeContent() {
       setError(null);
       
       try {
-        console.log('HomeContent: Starting API call...');
-        
-        // 直接调用API，绕过复杂的转换逻辑
-        const response = await fetch('/api/anime/home');
-        console.log('HomeContent: Response status:', response.status);
+        // 直接调用生产环境API
+        const response = await fetch('https://api-jk.funnyu.xyz/api/v1/anime/home');
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         
         const result = await response.json();
-        console.log('HomeContent: Raw result:', result);
         
         // 简单的数据处理，确保包含所有必需字段
         const data = {
@@ -102,14 +98,10 @@ export function HomeContent() {
           }))
         };
         
-        console.log('HomeContent: Processed data:', data);
-        
         if (isMounted) {
-          console.log('HomeContent: Setting data...');
           setHomeData(data);
         }
       } catch (err) {
-        console.error('HomeContent: Error occurred:', err);
         if (isMounted) {
           setError(err instanceof Error ? err.message : 'Error desconocido');
         }
