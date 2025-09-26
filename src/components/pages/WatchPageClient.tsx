@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { apiClient } from '@/lib/api';
+// Removed apiClient import to avoid Edge Runtime issues
 import { Episode, Player } from '@/types/anime';
 import { VideoPlayer } from '@/components/ui/VideoPlayer';
 import { PlayerSelector } from '@/components/ui/PlayerSelector';
@@ -32,11 +32,45 @@ export function WatchPageClient() {
           return;
         }
 
-        const data = await apiClient.getEpisodePlay(id);
-        setEpisode(data.episode);
+        // Load episode play data
+        const episodeResponse = await fetch(`https://api-jk.funnyu.xyz/api/v1/anime/play/${id}`, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!episodeResponse.ok) {
+          throw new Error(`HTTP error! status: ${episodeResponse.status}`);
+        }
+
+        const episodeResult = await episodeResponse.json();
+        
+        let episodeData;
+        if (episodeResult.result_code !== undefined) {
+          if (episodeResult.result_code !== 200) {
+            throw new Error(episodeResult.msg || 'API returned error');
+          }
+          episodeData = episodeResult.data;
+        } else if (episodeResult.msg !== undefined) {
+          if (episodeResult.msg !== 'succeed') {
+            throw new Error(episodeResult.msg || 'API returned error');
+          }
+          episodeData = episodeResult.data;
+        } else {
+          episodeData = episodeResult;
+        }
+
+        const episode = episodeData.episode || episodeData;
+        const players = episodeData.players || [];
+
+        setEpisode({
+          ...episode,
+          episodeNumber: episode.number || episode.episodeNumber,
+          title: episode.title || `Episodio ${episode.number || episode.episodeNumber || 'N/A'}`
+        });
         
         // Filter out unwanted players (DoodStream and MediaFire)
-        const filteredPlayers = data.players.filter(player => {
+        const filteredPlayers = players.filter((player: any) => {
           const serverName = player.server?.toLowerCase() || player.name?.toLowerCase() || '';
           return !serverName.includes('dood') && 
                  !serverName.includes('mediafire') &&
@@ -51,14 +85,70 @@ export function WatchPageClient() {
         }
 
         // Load anime details to get all episodes
-        if (data.episode.animeId) {
+        if (episode.animeId) {
           try {
-            const animeData = await apiClient.getAnimeDetail(data.episode.animeId);
-            setAnimeInfo(animeData);
-            setAllEpisodes(animeData.episodes || []);
-            
-            // Add to watch history when episode loads
-            addToWatchHistory(animeData, data.episode);
+            const animeResponse = await fetch(`https://api-jk.funnyu.xyz/api/v1/anime/detail/${episode.animeId}`, {
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            });
+
+            if (animeResponse.ok) {
+              const animeResult = await animeResponse.json();
+              
+              let animeData;
+              if (animeResult.result_code !== undefined) {
+                if (animeResult.result_code === 200) {
+                  animeData = animeResult.data;
+                }
+              } else if (animeResult.msg !== undefined) {
+                if (animeResult.msg === 'succeed') {
+                  animeData = animeResult.data;
+                }
+              } else {
+                animeData = animeResult;
+              }
+
+              if (animeData) {
+                const animeInfo = animeData.anime || animeData;
+                const episodes = animeData.episodes || [];
+
+                const transformedAnime = {
+                  id: animeInfo.id,
+                  name: animeInfo.name || 'Unknown',
+                  nameAlternative: animeInfo.nameAlternative || '',
+                  slug: animeInfo.slug || '',
+                  imagen: animeInfo.imagen || '',
+                  imagenCapitulo: animeInfo.imagenCapitulo || '',
+                  type: animeInfo.type === 'movie' ? 'movie' : 'series',
+                  status: animeInfo.status || 'ongoing',
+                  genres: animeInfo.genres || '',
+                  rating: animeInfo.rating || '0',
+                  voteAverage: animeInfo.voteAverage || '',
+                  visitas: animeInfo.visitas || 0,
+                  overview: animeInfo.overview || '',
+                  aired: animeInfo.aired || '',
+                  createdAt: animeInfo.createdAt || '',
+                  lang: animeInfo.lang || 'sub',
+                  episodeCount: animeInfo.episodeCount || '',
+                  latestEpisode: animeInfo.latestEpisode || '',
+                  title: animeInfo.name || 'Unknown',
+                  totalEpisodes: animeData.totalEpisodes || episodes.length || 0,
+                };
+
+                const transformedEpisodes = episodes.map((ep: any) => ({
+                  ...ep,
+                  episodeNumber: ep.number || ep.episodeNumber,
+                  title: ep.title || `Episodio ${ep.number || ep.episodeNumber || 'N/A'}`
+                }));
+
+                setAnimeInfo(transformedAnime);
+                setAllEpisodes(transformedEpisodes);
+                
+                // Add to watch history when episode loads
+                addToWatchHistory(transformedAnime, episode);
+              }
+            }
           } catch (animeErr) {
             // Silently handle anime details loading error
           }
