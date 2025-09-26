@@ -18,6 +18,8 @@ interface AnimeListProps {
 }
 
 export function AnimeList({ type, page, genre, sort, lang, basePath }: AnimeListProps) {
+  console.log('AnimeList: Component mounted with props:', { type, page, genre, sort, lang, basePath });
+  
   const [animes, setAnimes] = useState<Anime[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,88 +31,100 @@ export function AnimeList({ type, page, genre, sort, lang, basePath }: AnimeList
   });
 
   useEffect(() => {
-    const loadAnimes = () => {
+    const loadAnimes = async () => {
+      console.log('AnimeList: Starting to load animes', { type, page, genre, sort, lang });
       setLoading(true);
       setError(null);
       
-      // 直接调用生产环境API
-      const searchParams = new URLSearchParams();
-      if (type) {
-        if (type === 'series') {
-          searchParams.append('type', 'Serie');
-        } else if (type === 'movie') {
-          searchParams.append('type', 'movie');
-        }
-      }
-      if (page) searchParams.append('page', page.toString());
-      if (genre) searchParams.append('genre', genre);
-      if (sort) searchParams.append('sort', sort);
-      if (lang) searchParams.append('lang', lang);
-      searchParams.append('size', '24');
-      
-      const queryString = searchParams.toString();
-      const url = `https://api-jk.funnyu.xyz/api/v1/anime/list${queryString ? `?${queryString}` : ''}`;
-      
-      fetch(url)
-        .then(async (response) => {
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+      try {
+        // 直接调用生产环境API
+        const searchParams = new URLSearchParams();
+        if (type) {
+          if (type === 'series') {
+            searchParams.append('type', 'Serie');
+          } else if (type === 'movie') {
+            searchParams.append('type', 'movie');
           }
-          
-          const result = await response.json();
-          
-          // 简单的数据处理
-          const animes = (result.data?.list || []).map((anime: any) => ({
-            id: anime.id,
-            name: anime.name || 'Unknown',
-            nameAlternative: anime.nameAlternative || '',
-            slug: anime.slug || '',
-            imagen: anime.imagen || '',
-            imagenCapitulo: anime.imagenCapitulo || '',
-            type: anime.type === 'movie' ? 'movie' : 'series',
-            status: anime.status || 'ongoing',
-            genres: anime.genres || '',
-            rating: anime.rating || '0',
-            voteAverage: anime.voteAverage || '',
-            visitas: anime.visitas || 0,
-            overview: anime.overview || '',
-            aired: anime.aired || '',
-            createdAt: anime.createdAt || '',
-            lang: anime.lang || 'sub',
-            episodeCount: anime.episodeCount || '',
-            latestEpisode: anime.latestEpisode || '',
-            // 兼容字段
-            title: anime.name || 'Unknown',
-            description: anime.overview || '',
-            poster: anime.imagen || '',
-            banner: anime.imagenCapitulo || anime.imagen || '',
-            year: anime.aired ? (() => {
-              try {
-                return new Date(anime.aired).getFullYear();
-              } catch {
-                return undefined;
-              }
-            })() : undefined,
-          }));
-          
-          const total = result.data?.pagination?.totalCount || 0;
-          const size = result.data?.pagination?.pageSize || 24;
-          const totalPages = Math.ceil(total / size);
-
-          setAnimes(animes);
-          setPagination({
-            total,
-            page,
-            size,
-            totalPages
-          });
-        })
-        .catch((err) => {
-          setError(err instanceof Error ? err.message : 'Error desconocido');
-        })
-        .finally(() => {
-          setLoading(false);
+        }
+        if (page) searchParams.append('page', page.toString());
+        if (genre) searchParams.append('genre', genre);
+        if (sort) searchParams.append('sort', sort);
+        if (lang) searchParams.append('lang', lang);
+        searchParams.append('size', '24');
+        
+        const queryString = searchParams.toString();
+        const url = `https://api-jk.funnyu.xyz/api/v1/anime/list${queryString ? `?${queryString}` : ''}`;
+        
+        console.log('AnimeList: Fetching from URL:', url);
+        
+        const response = await fetch(url, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
         });
+        
+        console.log('AnimeList: Response status:', response.status);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        console.log('AnimeList: API response:', result);
+        
+        // 简单的数据处理
+        const animes = (result.data?.list || []).map((anime: any) => ({
+          id: anime.id,
+          name: anime.name || 'Unknown',
+          nameAlternative: anime.nameAlternative || '',
+          slug: anime.slug || '',
+          imagen: anime.imagen || '',
+          imagenCapitulo: anime.imagenCapitulo || '',
+          type: anime.type === 'movie' ? 'movie' : 'series',
+          status: anime.status || 'ongoing',
+          genres: anime.genres || '',
+          rating: anime.rating || '0',
+          voteAverage: anime.voteAverage || '',
+          visitas: anime.visitas || 0,
+          overview: anime.overview || '',
+          aired: anime.aired || '',
+          createdAt: anime.createdAt || '',
+          lang: anime.lang || 'sub',
+          episodeCount: anime.episodeCount || '',
+          latestEpisode: anime.latestEpisode || '',
+          // 兼容字段
+          title: anime.name || 'Unknown',
+          description: anime.overview || '',
+          poster: anime.imagen || '',
+          banner: anime.imagenCapitulo || anime.imagen || '',
+          year: anime.aired ? (() => {
+            try {
+              return new Date(anime.aired).getFullYear();
+            } catch {
+              return undefined;
+            }
+          })() : undefined,
+        }));
+        
+        const total = result.data?.pagination?.totalCount || 0;
+        const size = result.data?.pagination?.pageSize || 24;
+        const totalPages = Math.ceil(total / size);
+
+        console.log('AnimeList: Processed data:', { animes: animes.length, total, totalPages });
+
+        setAnimes(animes);
+        setPagination({
+          total,
+          page,
+          size,
+          totalPages
+        });
+      } catch (err) {
+        console.error('AnimeList: Error loading animes:', err);
+        setError(err instanceof Error ? err.message : 'Error desconocido');
+      } finally {
+        setLoading(false);
+      }
     };
 
     loadAnimes();
@@ -166,8 +180,6 @@ export function AnimeList({ type, page, genre, sort, lang, basePath }: AnimeList
         currentLang={lang}
         basePath={basePath}
       />
-
-
 
       {/* Results */}
       {animes.length > 0 ? (
