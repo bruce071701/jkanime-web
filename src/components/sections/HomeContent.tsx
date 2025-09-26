@@ -16,26 +16,108 @@ export function HomeContent() {
   useEffect(() => {
     let isMounted = true;
     
-    const loadHomeData = () => {
+    const loadHomeData = async () => {
       setLoading(true);
       setError(null);
       
-      apiClient.getHomeData()
-        .then((data) => {
-          if (isMounted) {
-            setHomeData(data);
-          }
-        })
-        .catch((err) => {
-          if (isMounted) {
-            setError(err instanceof Error ? err.message : 'Error desconocido');
-          }
-        })
-        .finally(() => {
-          if (isMounted) {
-            setLoading(false);
-          }
-        });
+      try {
+        console.log('HomeContent: Starting API call...');
+        
+        // 直接调用API，绕过复杂的转换逻辑
+        const response = await fetch('/api/anime/home');
+        console.log('HomeContent: Response status:', response.status);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        console.log('HomeContent: Raw result:', result);
+        
+        // 简单的数据处理，确保包含所有必需字段
+        const data = {
+          latestMovies: (result.data?.latestMovies || []).map((anime: any) => ({
+            id: anime.id,
+            name: anime.name || 'Unknown',
+            nameAlternative: anime.nameAlternative || '',
+            slug: anime.slug || '',
+            imagen: anime.imagen || '',
+            imagenCapitulo: anime.imagenCapitulo || '',
+            type: anime.type === 'movie' ? 'movie' : 'series',
+            status: anime.status || 'ongoing',
+            genres: anime.genres || '',
+            rating: anime.rating || '0',
+            voteAverage: anime.voteAverage || '',
+            visitas: anime.visitas || 0,
+            overview: anime.overview || '',
+            aired: anime.aired || '',
+            createdAt: anime.createdAt || '',
+            lang: anime.lang || 'sub',
+            episodeCount: anime.episodeCount || '',
+            latestEpisode: anime.latestEpisode || '',
+            // 兼容字段
+            title: anime.name || 'Unknown',
+            description: anime.overview || '',
+            poster: anime.imagen || '',
+            banner: anime.imagenCapitulo || anime.imagen || '',
+            year: anime.aired ? (() => {
+              try {
+                return new Date(anime.aired).getFullYear();
+              } catch {
+                return undefined;
+              }
+            })() : undefined,
+          })),
+          latestSeries: (result.data?.latestSeries || []).map((anime: any) => ({
+            id: anime.id,
+            name: anime.name || 'Unknown',
+            nameAlternative: anime.nameAlternative || '',
+            slug: anime.slug || '',
+            imagen: anime.imagen || '',
+            imagenCapitulo: anime.imagenCapitulo || '',
+            type: 'series',
+            status: anime.status || 'ongoing',
+            genres: anime.genres || '',
+            rating: anime.rating || '0',
+            voteAverage: anime.voteAverage || '',
+            visitas: anime.visitas || 0,
+            overview: anime.overview || '',
+            aired: anime.aired || '',
+            createdAt: anime.createdAt || '',
+            lang: anime.lang || 'sub',
+            episodeCount: anime.episodeCount || '',
+            latestEpisode: anime.latestEpisode || '',
+            // 兼容字段
+            title: anime.name || 'Unknown',
+            description: anime.overview || '',
+            poster: anime.imagen || '',
+            banner: anime.imagenCapitulo || anime.imagen || '',
+            year: anime.aired ? (() => {
+              try {
+                return new Date(anime.aired).getFullYear();
+              } catch {
+                return undefined;
+              }
+            })() : undefined,
+          }))
+        };
+        
+        console.log('HomeContent: Processed data:', data);
+        
+        if (isMounted) {
+          console.log('HomeContent: Setting data...');
+          setHomeData(data);
+        }
+      } catch (err) {
+        console.error('HomeContent: Error occurred:', err);
+        if (isMounted) {
+          setError(err instanceof Error ? err.message : 'Error desconocido');
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
     };
 
     loadHomeData();

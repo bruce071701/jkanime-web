@@ -91,8 +91,8 @@ class ApiClient {
                 // 服务器端
                 baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
             } else {
-                // 客户端
-                baseUrl = window.location.origin;
+                // 客户端 - 使用相对路径
+                baseUrl = '';
             }
             
             const response = await fetch(`${baseUrl}/api/anime/home`, {
@@ -150,6 +150,7 @@ class ApiClient {
                     try {
                         return this.transformAnime(anime);
                     } catch (error) {
+                        console.warn('Failed to transform movie anime:', error, anime);
                         return null;
                     }
                 }).filter(Boolean),
@@ -157,6 +158,7 @@ class ApiClient {
                     try {
                         return this.transformAnime(anime);
                     } catch (error) {
+                        console.warn('Failed to transform series anime:', error, anime);
                         return null;
                     }
                 }).filter(Boolean)
@@ -180,8 +182,8 @@ class ApiClient {
                 // 服务器端
                 baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
             } else {
-                // 客户端
-                baseUrl = window.location.origin;
+                // 客户端 - 使用相对路径
+                baseUrl = '';
             }
             
             const response = await fetch(`${baseUrl}/api/anime/detail/${animeId}`, {
@@ -253,7 +255,7 @@ class ApiClient {
             // 使用本地 API 代理避免 CORS 问题
             const baseUrl = typeof window === 'undefined' 
                 ? (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000')
-                : window.location.origin;
+                : '';
             
             const response = await fetch(`${baseUrl}/api/anime/play/${episodeId}`, {
                 headers: {
@@ -340,7 +342,7 @@ class ApiClient {
             // 使用本地 API 代理避免 CORS 问题
             const baseUrl = typeof window === 'undefined' 
                 ? (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000')
-                : window.location.origin;
+                : '';
             
             const url = `${baseUrl}/api/anime/list${queryString ? `?${queryString}` : ''}`;
             
@@ -399,28 +401,23 @@ class ApiClient {
             throw new Error('Invalid anime data received from API');
         }
         
-        // Ensure we have required fields
-        if (!apiAnime.id) {
+        // Ensure we have required fields - be more lenient
+        if (!apiAnime.id && !apiAnime.animeId) {
             throw new Error('Anime data missing required ID field');
         }
         
         const transformedAnime: Anime = {
-            ...apiAnime,
-            // Ensure we have a name
+            // Use the original data as base
+            id: apiAnime.id || apiAnime.animeId || 0,
             name: apiAnime.name || apiAnime.title || 'Unknown Title',
             nameAlternative: apiAnime.nameAlternative || apiAnime.name || apiAnime.title || '',
-            type: ['serie', 'tv', 'series', 'Serie'].includes(apiAnime.type) ? 'series' : 'movie',
-            status: apiAnime.status === '0' || apiAnime.status === 0 ? 'ongoing' : 'completed',
-            // 兼容性字段
-            title: apiAnime.name || apiAnime.title || 'Unknown Title',
-            description: apiAnime.overview || apiAnime.description || '',
-            poster: apiAnime.imagen || apiAnime.poster || '',
-            banner: apiAnime.imagenCapitulo || apiAnime.imagen || apiAnime.banner || '',
-            year: apiAnime.aired ? this.extractYear(apiAnime.aired) : undefined,
-            // Ensure we have default values for required fields
             slug: apiAnime.slug || '',
             imagen: apiAnime.imagen || '',
             imagenCapitulo: apiAnime.imagenCapitulo || apiAnime.imagen || '',
+            type: ['serie', 'tv', 'series', 'Serie'].includes(apiAnime.type) ? 'series' : 'movie',
+            status: apiAnime.status === '0' || apiAnime.status === 0 ? 'ongoing' : 'completed',
+            genres: apiAnime.genres || '',
+            rating: apiAnime.rating || '0',
             voteAverage: apiAnime.voteAverage || '',
             visitas: apiAnime.visitas || 0,
             overview: apiAnime.overview || apiAnime.description || '',
@@ -429,6 +426,12 @@ class ApiClient {
             lang: apiAnime.lang || 'sub',
             episodeCount: apiAnime.episodeCount || '',
             latestEpisode: apiAnime.latestEpisode || '',
+            // 兼容性字段
+            title: apiAnime.name || apiAnime.title || 'Unknown Title',
+            description: apiAnime.overview || apiAnime.description || '',
+            poster: apiAnime.imagen || apiAnime.poster || '',
+            banner: apiAnime.imagenCapitulo || apiAnime.imagen || apiAnime.banner || '',
+            year: apiAnime.aired ? this.extractYear(apiAnime.aired) : undefined,
         };
 
         // Handle genres - convert string to array if needed
@@ -513,7 +516,7 @@ class ApiClient {
             // 使用本地 API 代理避免 CORS 问题
             const baseUrl = typeof window === 'undefined' 
                 ? (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000')
-                : window.location.origin;
+                : '';
             
             const response = await fetch(`${baseUrl}/api/anime/genres`, {
                 headers: {
