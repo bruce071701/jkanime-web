@@ -52,11 +52,52 @@ export function AnimeList({ type, page, genre, sort, lang, basePath }: AnimeList
       const url = `https://api-jk.funnyu.xyz/api/v1/anime/list${queryString ? `?${queryString}` : ''}`;
       
       fetch(url)
-        .then((response) => {
-          const { animes: responseAnimes, total, size } = response;
+        .then(async (response) => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          
+          const result = await response.json();
+          
+          // 简单的数据处理
+          const animes = (result.data?.list || []).map((anime: any) => ({
+            id: anime.id,
+            name: anime.name || 'Unknown',
+            nameAlternative: anime.nameAlternative || '',
+            slug: anime.slug || '',
+            imagen: anime.imagen || '',
+            imagenCapitulo: anime.imagenCapitulo || '',
+            type: anime.type === 'movie' ? 'movie' : 'series',
+            status: anime.status || 'ongoing',
+            genres: anime.genres || '',
+            rating: anime.rating || '0',
+            voteAverage: anime.voteAverage || '',
+            visitas: anime.visitas || 0,
+            overview: anime.overview || '',
+            aired: anime.aired || '',
+            createdAt: anime.createdAt || '',
+            lang: anime.lang || 'sub',
+            episodeCount: anime.episodeCount || '',
+            latestEpisode: anime.latestEpisode || '',
+            // 兼容字段
+            title: anime.name || 'Unknown',
+            description: anime.overview || '',
+            poster: anime.imagen || '',
+            banner: anime.imagenCapitulo || anime.imagen || '',
+            year: anime.aired ? (() => {
+              try {
+                return new Date(anime.aired).getFullYear();
+              } catch {
+                return undefined;
+              }
+            })() : undefined,
+          }));
+          
+          const total = result.data?.pagination?.totalCount || 0;
+          const size = result.data?.pagination?.pageSize || 24;
           const totalPages = Math.ceil(total / size);
 
-          setAnimes(responseAnimes);
+          setAnimes(animes);
           setPagination({
             total,
             page,
