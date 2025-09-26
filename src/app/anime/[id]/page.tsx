@@ -38,13 +38,66 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
 
   let anime;
   try {
-    anime = await apiClient.getAnimeDetail(animeId);
+    // 直接调用API而不通过apiClient，避免Edge Runtime兼容性问题
+    const response = await fetch(`https://api-jk.funnyu.xyz/api/v1/anime/detail/${animeId}`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
     
-    // Validate that we have the essential data
-    if (!anime || !anime.id) {
-      console.error('Invalid anime data received:', anime);
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status}`);
+    }
+    
+    const result = await response.json();
+    
+    // 简单的数据处理
+    const data = result.data || result;
+    const animeData = data.anime || data;
+    
+    if (!animeData || !animeData.id) {
       notFound();
     }
+    
+    // 基本的数据转换
+    anime = {
+      id: animeData.id,
+      name: animeData.name || 'Unknown',
+      nameAlternative: animeData.nameAlternative || '',
+      slug: animeData.slug || '',
+      imagen: animeData.imagen || '',
+      imagenCapitulo: animeData.imagenCapitulo || animeData.imagen || '',
+      type: animeData.type === 'movie' ? 'movie' : 'series',
+      status: animeData.status || 'ongoing',
+      genres: animeData.genres || '',
+      rating: animeData.rating || '0',
+      voteAverage: animeData.voteAverage || '',
+      visitas: animeData.visitas || 0,
+      overview: animeData.overview || '',
+      aired: animeData.aired || '',
+      createdAt: animeData.createdAt || '',
+      lang: animeData.lang || 'sub',
+      episodeCount: animeData.episodeCount || '',
+      latestEpisode: animeData.latestEpisode || '',
+      title: animeData.name || 'Unknown',
+      description: animeData.overview || '',
+      poster: animeData.imagen || '',
+      banner: animeData.imagenCapitulo || animeData.imagen || '',
+      year: animeData.aired ? (() => {
+        try {
+          return new Date(animeData.aired).getFullYear();
+        } catch {
+          return undefined;
+        }
+      })() : undefined,
+      episodes: (data.episodes || []).map((ep: any) => ({
+        ...ep,
+        episodeNumber: ep.number || ep.episodeNumber,
+        title: ep.title || `Episodio ${ep.number || ep.episodeNumber || 'N/A'}`
+      })),
+      totalEpisodes: data.totalEpisodes || data.currentEpisodes || 0,
+    };
+    
   } catch (error) {
     console.error('Error fetching anime detail:', error);
     notFound();
@@ -159,7 +212,7 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
                 {/* Genres */}
                 {anime.genres && (
                   <div className="flex flex-wrap gap-2 mb-6">
-                    {(Array.isArray(anime.genres) ? anime.genres : anime.genres.split(',')).map((genre, index) => (
+                    {(Array.isArray(anime.genres) ? anime.genres : anime.genres.split(',')).map((genre: string, index: number) => (
                       <Link
                         key={`${genre}-${index}`}
                         href={`/series?genre=${encodeURIComponent(genre.trim())}`}
@@ -244,8 +297,8 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
                   {/* Episodes Grid */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
                     {anime.episodes
-                      .sort((a, b) => (a.episodeNumber || a.number || 0) - (b.episodeNumber || b.number || 0))
-                      .map((episode) => (
+                      .sort((a: any, b: any) => (a.episodeNumber || a.number || 0) - (b.episodeNumber || b.number || 0))
+                      .map((episode: any) => (
                       <Link
                         key={episode.id}
                         href={`/watch/${episode.id}`}
