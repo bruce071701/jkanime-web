@@ -8,31 +8,37 @@ export const runtime = 'edge';
 
 export async function GET() {
   try {
-    console.log('API Proxy: Fetching genres data from', `${API_BASE_URL}/api/v1/anime/genres`);
+    const apiUrl = `${API_BASE_URL}/api/v1/anime/genres`;
     
-    const response = await fetch(`${API_BASE_URL}/api/v1/anime/genres`, {
+    const response = await fetch(apiUrl, {
+      method: 'GET',
       headers: {
-        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'User-Agent': 'JKAnime-Web/1.0',
       },
-      next: { revalidate: 3600 }, // 1 hour cache for genres
     });
 
     if (!response.ok) {
-      console.error('API Proxy: Backend API error:', response.status, response.statusText);
       return NextResponse.json(
-        { error: `Backend API error: ${response.status} ${response.statusText}` },
+        { 
+          error: 'API request failed', 
+          status: response.status,
+          statusText: response.statusText,
+          url: apiUrl
+        },
         { status: response.status }
       );
     }
 
     const data = await response.json();
-    console.log('API Proxy: Successfully fetched genres data');
-    
     return NextResponse.json(data);
   } catch (error) {
-    console.error('API Proxy: Error fetching genres data:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch genres' },
+      { 
+        error: 'Network error', 
+        message: error instanceof Error ? error.message : 'Unknown error',
+        apiUrl: `${API_BASE_URL}/api/v1/anime/genres`
+      },
       { status: 500 }
     );
   }

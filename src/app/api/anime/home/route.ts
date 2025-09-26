@@ -8,31 +8,37 @@ export const runtime = 'edge';
 
 export async function GET() {
   try {
-    console.log('API Proxy: Fetching home data from', `${API_BASE_URL}/api/v1/anime/home`);
+    const apiUrl = `${API_BASE_URL}/api/v1/anime/home`;
     
-    const response = await fetch(`${API_BASE_URL}/api/v1/anime/home`, {
+    const response = await fetch(apiUrl, {
+      method: 'GET',
       headers: {
-        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'User-Agent': 'JKAnime-Web/1.0',
       },
-      cache: 'no-store', // Disable caching for development
     });
 
     if (!response.ok) {
-      console.error('API Proxy Error:', response.status, response.statusText);
       return NextResponse.json(
-        { error: 'Failed to fetch data', status: response.status },
+        { 
+          error: 'API request failed', 
+          status: response.status,
+          statusText: response.statusText,
+          url: apiUrl
+        },
         { status: response.status }
       );
     }
 
     const data = await response.json();
-    console.log('API Proxy: Successfully fetched data');
-
     return NextResponse.json(data);
   } catch (error) {
-    console.error('API Proxy Error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch data', details: error instanceof Error ? error.message : 'Unknown error' },
+      { 
+        error: 'Network error', 
+        message: error instanceof Error ? error.message : 'Unknown error',
+        apiUrl: `${API_BASE_URL}/api/v1/anime/home`
+      },
       { status: 500 }
     );
   }
