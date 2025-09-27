@@ -1,7 +1,7 @@
 // Google Analytics配置
 export const ANALYTICS_CONFIG = {
   // Google Analytics测量ID
-  GA_MEASUREMENT_ID: 'G-F3G0RXE6RW',
+  GA_MEASUREMENT_ID: 'G-HQJSYW0VHZ',
   
   // 是否启用Analytics（生产环境）
   ENABLED: import.meta.env.PROD,

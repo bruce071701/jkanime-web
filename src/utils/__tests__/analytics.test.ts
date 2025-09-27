@@ -33,7 +33,7 @@ describe('Analytics Utils', () => {
   it('should track page view', () => {
     trackPageView('/test-page', 'Test Page');
     
-    expect(mockGtag).toHaveBeenCalledWith('config', 'G-F3G0RXE6RW', {
+    expect(mockGtag).toHaveBeenCalledWith('config', 'G-HQJSYW0VHZ', {
       page_path: '/test-page',
       page_title: 'Test Page'
     });

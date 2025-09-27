@@ -6,7 +6,7 @@ JKAnime网站已完全集成Google Analytics (GA4)，用于跟踪用户行为、
 
 ## 配置信息
 
-- **测量ID**: `G-F3G0RXE6RW`
+- **测量ID**: `G-HQJSYW0VHZ`
 - **环境**: 仅在生产环境启用
 - **调试**: 开发环境启用调试模式
 
