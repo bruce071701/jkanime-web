@@ -63,7 +63,7 @@ export function AnimeDetailPage() {
   }
 
   const { anime, episodes } = animeDetail;
-  const rating = processRating(anime.rating, anime.voteAverage);
+  const rating = processRating(anime.rating || '', anime.voteAverage);
 
   return (
     <div className="min-h-screen">
@@ -155,11 +155,11 @@ export function AnimeDetailPage() {
                   <span className={`w-2 h-2 rounded-full mr-2 ${
                     anime.status === 'completed' ? 'bg-green-500' : 'bg-yellow-500'
                   }`} />
-                  {formatStatus(anime.status)}
+                  {formatStatus(String(anime.status))}
                 </div>
 
                 <div className="flex items-center bg-gray-800 px-3 py-1 rounded">
-                  {formatLang(anime.lang)}
+                  {formatLang(anime.lang || 'sub')}
                 </div>
               </div>
 

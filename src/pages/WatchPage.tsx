@@ -6,8 +6,7 @@ import { PlayData } from '../types/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { VideoPlayer } from '../components/VideoPlayer';
-import { addToWatchHistory, updateWatchProgress } from '../utils/watchHistory';
-import { isSeriesType } from '../utils/format';
+import { addToWatchHistory } from '../utils/watchHistory';
 
 export function WatchPage() {
   const { episodeId } = useParams<{ episodeId: string }>();

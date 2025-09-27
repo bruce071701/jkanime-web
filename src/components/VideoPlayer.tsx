@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Play, ExternalLink, AlertCircle } from 'lucide-react';
+import { ExternalLink, AlertCircle } from 'lucide-react';
 
 interface VideoPlayerProps {
   url: string;
