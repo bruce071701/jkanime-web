@@ -7,6 +7,7 @@ import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { processRating, getRatingColorClass } from '../utils/rating';
 import { formatType, formatStatus, formatLang, formatDate, isMovieType, isSeriesType } from '../utils/format';
+import { trackAnimeView } from '../utils/analytics';
 
 export function AnimeDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -28,6 +29,9 @@ export function AnimeDetailPage() {
       setError(null);
       const data = await apiService.getAnimeDetail(animeId);
       setAnimeDetail(data);
+      
+      // 跟踪动漫查看
+      trackAnimeView(data.anime.id, data.anime.name, data.anime.type);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {

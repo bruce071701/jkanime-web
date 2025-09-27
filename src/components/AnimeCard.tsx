@@ -4,6 +4,7 @@ import { Anime } from '../types/api';
 import { processRating, getRatingColorClass } from '../utils/rating';
 import { formatType, formatLang, getYear, isMovieType, isSeriesType } from '../utils/format';
 import { getAnimeProgress } from '../utils/watchHistory';
+import { trackAnimeView } from '../utils/analytics';
 
 interface AnimeCardProps {
   anime: Anime;
@@ -21,7 +22,8 @@ export function AnimeCard({ anime, showEpisodeCount = false }: AnimeCardProps) {
   return (
     <Link
       to={`/anime/${anime.id}`}
-      className="group bg-gray-800 rounded-xl overflow-hidden hover:bg-gray-750 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
+      className="group bg-gray-800 rounded-lg sm:rounded-xl overflow-hidden hover:bg-gray-750 transition-all duration-300 sm:hover:scale-105 shadow-lg hover:shadow-xl touch-manipulation"
+      onClick={() => trackAnimeView(anime.id, anime.name, anime.type, window.location.pathname)}
     >
       <div className="aspect-[3/4] relative overflow-hidden">
         {anime.imagen ? (

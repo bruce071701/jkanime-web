@@ -7,6 +7,7 @@ import { AnimeCard } from '../components/AnimeCard';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { Pagination } from '../components/Pagination';
+import { trackSearch } from '../utils/analytics';
 
 export function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -33,6 +34,9 @@ export function SearchPage() {
       
       const data = await apiService.searchAnime(params);
       setListData(data);
+      
+      // 跟踪搜索事件
+      trackSearch(searchTerm.trim(), data.pagination.total);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido');
       setListData(null);

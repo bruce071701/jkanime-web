@@ -7,6 +7,7 @@ import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { Pagination } from '../components/Pagination';
 import { AnimeFilters } from '../components/AnimeFilters';
+import { trackGenreView, trackLanguageFilter } from '../utils/analytics';
 
 export function GenresPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -48,6 +49,9 @@ export function GenresPage() {
       
       const data = await apiService.getAnimeList(params);
       setListData(data);
+      
+      // 跟踪分类浏览
+      trackGenreView(genre);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {

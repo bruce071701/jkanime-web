@@ -7,6 +7,7 @@ import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { VideoPlayer } from '../components/VideoPlayer';
 import { addToWatchHistory } from '../utils/watchHistory';
+import { trackEpisodePlay } from '../utils/analytics';
 
 export function WatchPage() {
   const { episodeId } = useParams<{ episodeId: string }>();
@@ -56,6 +57,15 @@ export function WatchPage() {
           data.episode.id,
           data.episode.number,
           data.episode.title
+        );
+        
+        // 跟踪剧集播放
+        trackEpisodePlay(
+          data.anime.id,
+          data.anime.name,
+          data.episode.id,
+          data.episode.number,
+          filteredPlayers[0]?.server || 'unknown'
         );
       }
     } catch (err) {
