@@ -105,9 +105,7 @@ export function HomePage() {
 
       <div className="container-custom py-16">
         {/* Watch History */}
-        <section className="mb-16">
-          <WatchHistory limit={8} />
-        </section>
+        <WatchHistory limit={8} hideWhenEmpty wrapInSection />
 
         {/* Últimas Películas */}
         {homeData.latestMovies && homeData.latestMovies.length > 0 && (

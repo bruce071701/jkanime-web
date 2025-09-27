@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Clock, Play, X, Trash2, Calendar, Search } from 'lucide-react';
-import { getWatchHistory, removeFromWatchHistory, clearWatchHistory, WatchHistoryItem } from '../utils/watchHistory';
+import { getWatchHistory, removeFromWatchHistory, clearWatchHistory, WatchHistoryItem, formatWatchProgress } from '../utils/watchHistory';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 
 export function HistoryPage() {
@@ -255,10 +255,34 @@ export function HistoryPage() {
                           <h4 className="font-medium text-white line-clamp-2 mb-2">
                             {item.animeTitle}
                           </h4>
-                          <p className="text-blue-400 text-sm mb-2">
-                            Episodio {item.episodeNumber}
+                          
+                          {/* Episode info */}
+                          <p className="text-blue-400 text-sm mb-1">
+                            {item.animeType === 'movie' ? 'Película' : `Episodio ${item.episodeNumber}`}
                             {item.episodeTitle && ` - ${item.episodeTitle}`}
                           </p>
+                          
+                          {/* Series progress info */}
+                          {item.animeType === 'series' && item.watchedEpisodesCount && (
+                            <div className="mb-2">
+                              <p className="text-green-400 text-xs mb-1">
+                                {formatWatchProgress(item.watchedEpisodesCount, item.totalEpisodes)}
+                              </p>
+                              
+                              {/* Progress bar for series with known total episodes */}
+                              {item.totalEpisodes && item.totalEpisodes > 0 && (
+                                <div className="w-full bg-gray-600 rounded-full h-1.5">
+                                  <div 
+                                    className="bg-green-500 h-1.5 rounded-full transition-all duration-300"
+                                    style={{ 
+                                      width: `${Math.min((item.watchedEpisodesCount / item.totalEpisodes) * 100, 100)}%` 
+                                    }}
+                                  ></div>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                          
                           <div className="flex items-center text-gray-400 text-sm">
                             <Clock className="h-3 w-3 mr-1" />
                             <span>

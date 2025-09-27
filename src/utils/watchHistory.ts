@@ -10,6 +10,10 @@ export interface WatchHistoryItem {
   watchedAt: string;
   progress?: number; // 观看进度 (0-100)
   duration?: string;
+  animeType?: string; // 动漫类型 (series/movie)
+  totalEpisodes?: number; // 总集数
+  watchedEpisodesCount?: number; // 已观看集数
+  latestEpisodeNumber?: number; // 最新观看的集数
 }
 
 const HISTORY_KEY = 'jkanime_watch_history';
@@ -40,6 +44,9 @@ export function addToWatchHistory(
   try {
     const currentHistory = getWatchHistory();
     
+    // 解析总集数
+    const totalEpisodes = anime.episodeCount ? parseInt(anime.episodeCount.toString()) : undefined;
+    
     const newItem: WatchHistoryItem = {
       animeId: anime.id,
       animeTitle: anime.name,
@@ -49,7 +56,9 @@ export function addToWatchHistory(
       episodeTitle,
       watchedAt: new Date().toISOString(),
       progress,
-      duration: '24min' // 默认时长，可以从API获取
+      duration: '24min', // 默认时长，可以从API获取
+      animeType: anime.type,
+      totalEpisodes: totalEpisodes && !isNaN(totalEpisodes) ? totalEpisodes : undefined
     };
 
     // 移除相同的记录（如果存在）
@@ -124,10 +133,21 @@ export function getRecentWatchedAnimes(limit: number = 10): WatchHistoryItem[] {
   const allHistory = getWatchHistory();
   const uniqueAnimes = new Map<number, WatchHistoryItem>();
   
-  // 按时间倒序，保留每个动漫的最新记录
+  // 按时间倒序，保留每个动漫的最新记录，并计算观看进度
   allHistory.forEach(item => {
     if (!uniqueAnimes.has(item.animeId)) {
-      uniqueAnimes.set(item.animeId, item);
+      // 计算该动漫的观看进度
+      const animeHistory = allHistory.filter(h => h.animeId === item.animeId);
+      const watchedEpisodesCount = animeHistory.length;
+      const latestEpisodeNumber = Math.max(...animeHistory.map(h => h.episodeNumber));
+      
+      const enhancedItem: WatchHistoryItem = {
+        ...item,
+        watchedEpisodesCount,
+        latestEpisodeNumber
+      };
+      
+      uniqueAnimes.set(item.animeId, enhancedItem);
     }
   });
 
@@ -153,4 +173,58 @@ export function getAnimeProgress(animeId: number): {
     watchedEpisodes,
     lastWatchedEpisode
   };
+}
+
+// 获取动漫的详细观看统计
+export function getAnimeWatchStats(animeId: number): {
+  watchedEpisodesCount: number;
+  latestEpisodeNumber: number;
+  totalEpisodes?: number;
+  watchProgress?: number; // 观看进度百分比
+  lastWatchedAt: string;
+} | null {
+  const animeHistory = getAnimeWatchHistory(animeId);
+  
+  if (animeHistory.length === 0) {
+    return null;
+  }
+
+  const watchedEpisodesCount = animeHistory.length;
+  const latestEpisodeNumber = Math.max(...animeHistory.map(h => h.episodeNumber));
+  const lastWatchedItem = animeHistory[0]; // 最新的记录
+  const totalEpisodes = lastWatchedItem.totalEpisodes;
+  
+  let watchProgress: number | undefined;
+  if (totalEpisodes && totalEpisodes > 0) {
+    watchProgress = Math.round((watchedEpisodesCount / totalEpisodes) * 100);
+  }
+
+  return {
+    watchedEpisodesCount,
+    latestEpisodeNumber,
+    totalEpisodes,
+    watchProgress,
+    lastWatchedAt: lastWatchedItem.watchedAt
+  };
+}
+
+// 格式化观看进度文本
+export function formatWatchProgress(
+  watchedCount: number, 
+  totalEpisodes?: number, 
+  latestEpisode?: number
+): string {
+  let progressText = `${watchedCount} episodio${watchedCount !== 1 ? 's' : ''} visto${watchedCount !== 1 ? 's' : ''}`;
+  
+  if (totalEpisodes && totalEpisodes > 0) {
+    progressText += ` de ${totalEpisodes}`;
+    const percentage = Math.round((watchedCount / totalEpisodes) * 100);
+    progressText += ` (${percentage}%)`;
+  }
+  
+  if (latestEpisode && latestEpisode > 0) {
+    progressText += ` • Último: EP ${latestEpisode}`;
+  }
+  
+  return progressText;
 }

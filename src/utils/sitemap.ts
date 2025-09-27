@@ -10,7 +10,7 @@ export interface SitemapUrl {
 
 export class SitemapGenerator {
   private baseUrl: string;
-  
+
   constructor(baseUrl: string = 'https://jkanimeflv.com') {
     this.baseUrl = baseUrl;
   }
@@ -18,7 +18,7 @@ export class SitemapGenerator {
   // 生成静态页面的sitemap条目
   getStaticPages(): SitemapUrl[] {
     const today = new Date().toISOString().split('T')[0];
-    
+
     return [
       {
         loc: `${this.baseUrl}/`,
@@ -64,7 +64,7 @@ export class SitemapGenerator {
     try {
       const genres = await apiService.getGenres();
       const today = new Date().toISOString().split('T')[0];
-      
+
       return genres.slice(0, 20).map(genre => ({
         loc: `${this.baseUrl}/generos?genre=${encodeURIComponent(genre.genre)}`,
         lastmod: today,
@@ -82,7 +82,7 @@ export class SitemapGenerator {
     try {
       const urls: SitemapUrl[] = [];
       const today = new Date().toISOString().split('T')[0];
-      
+
       // 获取最新的电影
       const moviesData = await apiService.getAnimeList({
         type: 'movie',
@@ -90,7 +90,7 @@ export class SitemapGenerator {
         size: Math.floor(limit / 2),
         sort: 'latest'
       });
-      
+
       // 获取最新的系列
       const seriesData = await apiService.getAnimeList({
         type: 'series',
@@ -98,7 +98,7 @@ export class SitemapGenerator {
         size: Math.floor(limit / 2),
         sort: 'latest'
       });
-      
+
       // 添加电影页面
       moviesData.list.forEach(anime => {
         urls.push({
@@ -108,7 +108,7 @@ export class SitemapGenerator {
           priority: 0.8
         });
       });
-      
+
       // 添加系列页面
       seriesData.list.forEach(anime => {
         urls.push({
@@ -118,7 +118,7 @@ export class SitemapGenerator {
           priority: 0.8
         });
       });
-      
+
       return urls;
     } catch (error) {
       console.error('Error fetching anime pages for sitemap:', error);
@@ -132,7 +132,7 @@ export class SitemapGenerator {
     const languages = ['latino', 'castellano', 'sub'];
     const types = ['peliculas', 'series'];
     const urls: SitemapUrl[] = [];
-    
+
     types.forEach(type => {
       languages.forEach(lang => {
         urls.push({
@@ -143,7 +143,7 @@ export class SitemapGenerator {
         });
       });
     });
-    
+
     return urls;
   }
 
@@ -153,17 +153,17 @@ export class SitemapGenerator {
     const genrePages = await this.getGenrePages();
     const animePages = await this.getAnimePages(50); // 限制为50个最新动漫
     const languagePages = this.getLanguagePages();
-    
+
     const allUrls = [
       ...staticPages,
       ...genrePages,
       ...animePages,
       ...languagePages
     ];
-    
+
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
-    
+
     allUrls.forEach(url => {
       xml += `
   <url>
@@ -173,20 +173,20 @@ export class SitemapGenerator {
     <priority>${url.priority}</priority>
   </url>`;
     });
-    
+
     xml += `
 </urlset>`;
-    
+
     return xml;
   }
 
   // 生成sitemap索引文件（如果需要多个sitemap文件）
   generateSitemapIndex(sitemapUrls: string[]): string {
     const today = new Date().toISOString().split('T')[0];
-    
+
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
-    
+
     sitemapUrls.forEach(sitemapUrl => {
       xml += `
   <sitemap>
@@ -194,10 +194,10 @@ export class SitemapGenerator {
     <lastmod>${today}</lastmod>
   </sitemap>`;
     });
-    
+
     xml += `
 </sitemapindex>`;
-    
+
     return xml;
   }
 }

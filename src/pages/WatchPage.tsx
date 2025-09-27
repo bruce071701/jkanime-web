@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Play } from 'lucide-react';
 import { apiService } from '../services/api';
-import { PlayData } from '../types/api';
+import { PlayData, AnimeDetail } from '../types/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { VideoPlayer } from '../components/VideoPlayer';
+import { EpisodeSelector } from '../components/EpisodeSelector';
 import { addToWatchHistory } from '../utils/watchHistory';
 import { trackEpisodePlay } from '../utils/analytics';
 
@@ -14,6 +15,7 @@ export function WatchPage() {
   const epId = parseInt(episodeId || '0');
   
   const [playData, setPlayData] = useState<PlayData | null>(null);
+  const [animeDetail, setAnimeDetail] = useState<AnimeDetail | null>(null);
   const [selectedPlayer, setSelectedPlayer] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -50,8 +52,17 @@ export function WatchPage() {
         players: filteredPlayers
       });
 
-      // 添加到观看历史
+      // 如果有动漫信息，获取完整的动漫详情（包含剧集列表）
       if (data.anime) {
+        try {
+          const animeDetailData = await apiService.getAnimeDetail(data.anime.id);
+          setAnimeDetail(animeDetailData);
+        } catch (animeDetailError) {
+          console.warn('Failed to load anime detail:', animeDetailError);
+          // 即使获取动漫详情失败，也不影响播放
+        }
+
+        // 添加到观看历史
         addToWatchHistory(
           data.anime,
           data.episode.id,
@@ -164,6 +175,16 @@ export function WatchPage() {
               </div>
             )}
           </div>
+
+          {/* Episode Selector */}
+          {animeDetail && animeDetail.episodes && animeDetail.episodes.length > 1 && (
+            <EpisodeSelector
+              episodes={animeDetail.episodes}
+              currentEpisodeId={episode.id}
+              animeId={anime?.id || 0}
+              animeTitle={anime?.name || 'Anime'}
+            />
+          )}
 
           {/* Episode Info */}
           <div className="bg-gray-900 rounded-lg p-6">

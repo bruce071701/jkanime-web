@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Clock, Play, X, Trash2, ChevronRight } from 'lucide-react';
-import { getRecentWatchedAnimes, removeFromWatchHistory, clearWatchHistory, WatchHistoryItem } from '../utils/watchHistory';
+import { getRecentWatchedAnimes, removeFromWatchHistory, clearWatchHistory, WatchHistoryItem, formatWatchProgress } from '../utils/watchHistory';
 
 interface WatchHistoryProps {
   limit?: number;
   showHeader?: boolean;
   compact?: boolean;
+  hideWhenEmpty?: boolean; // 新属性：在没有历史记录时隐藏组件
+  wrapInSection?: boolean; // 新属性：是否包装在section中
 }
 
-export function WatchHistory({ limit = 10, showHeader = true, compact = false }: WatchHistoryProps) {
+export function WatchHistory({ limit = 10, showHeader = true, compact = false, hideWhenEmpty = false, wrapInSection = false }: WatchHistoryProps) {
   const [history, setHistory] = useState<WatchHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -60,6 +62,17 @@ export function WatchHistory({ limit = 10, showHeader = true, compact = false }:
   }
 
   if (history.length === 0) {
+    // Si hideWhenEmpty es true, no mostrar nada
+    if (hideWhenEmpty) {
+      return null;
+    }
+    
+    // Si no hay historial y estamos en modo compacto, no mostrar nada
+    if (compact || !showHeader) {
+      return null;
+    }
+    
+    // Solo mostrar el mensaje vacío en la página de historial completa
     return (
       <div className="text-center py-8">
         <Clock className="h-12 w-12 text-gray-600 mx-auto mb-3" />
@@ -73,7 +86,7 @@ export function WatchHistory({ limit = 10, showHeader = true, compact = false }:
     );
   }
 
-  return (
+  const content = (
     <div className={compact ? '' : 'bg-gray-800 rounded-xl p-6'}>
       {showHeader && (
         <div className="flex items-center justify-between mb-6">
@@ -170,10 +183,37 @@ export function WatchHistory({ limit = 10, showHeader = true, compact = false }:
                 <h3 className={`font-medium text-white line-clamp-2 ${compact ? 'text-sm' : 'text-base'} mb-1`}>
                   {item.animeTitle}
                 </h3>
-                <p className={`text-blue-400 ${compact ? 'text-xs' : 'text-sm'} mb-1`}>
-                  Episodio {item.episodeNumber}
-                  {item.episodeTitle && ` - ${item.episodeTitle}`}
-                </p>
+                
+                {/* Episode info with progress for series */}
+                {item.animeType === 'series' && item.watchedEpisodesCount && item.latestEpisodeNumber ? (
+                  <div className={`${compact ? 'text-xs' : 'text-sm'} mb-1`}>
+                    <p className="text-blue-400">
+                      Episodio {item.latestEpisodeNumber}
+                      {item.episodeTitle && ` - ${item.episodeTitle}`}
+                    </p>
+                    <p className="text-green-400 text-xs mb-1">
+                      {formatWatchProgress(item.watchedEpisodesCount, item.totalEpisodes)}
+                    </p>
+                    
+                    {/* Progress bar for series with known total episodes */}
+                    {item.totalEpisodes && item.totalEpisodes > 0 && (
+                      <div className="w-full bg-gray-600 rounded-full h-1.5 mb-1">
+                        <div 
+                          className="bg-green-500 h-1.5 rounded-full transition-all duration-300"
+                          style={{ 
+                            width: `${Math.min((item.watchedEpisodesCount / item.totalEpisodes) * 100, 100)}%` 
+                          }}
+                        ></div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <p className={`text-blue-400 ${compact ? 'text-xs' : 'text-sm'} mb-1`}>
+                    {item.animeType === 'movie' ? 'Película' : `Episodio ${item.episodeNumber}`}
+                    {item.episodeTitle && ` - ${item.episodeTitle}`}
+                  </p>
+                )}
+                
                 <div className={`flex items-center text-gray-400 ${compact ? 'text-xs' : 'text-sm'}`}>
                   <Clock className="h-3 w-3 mr-1" />
                   <span>
@@ -208,4 +248,15 @@ export function WatchHistory({ limit = 10, showHeader = true, compact = false }:
       )}
     </div>
   );
+
+  // 如果需要包装在section中（如在HomePage中）
+  if (wrapInSection) {
+    return (
+      <section className="mb-16">
+        {content}
+      </section>
+    );
+  }
+
+  return content;
 }
