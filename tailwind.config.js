@@ -1,9 +1,8 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+export default {
   content: [
-    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {
@@ -20,9 +19,8 @@ module.exports = {
           800: '#075985',
           900: '#0c4a6e',
         },
-        dark: {
-          800: '#1f2937',
-          900: '#111827',
+        gray: {
+          750: '#374151',
         }
       },
       screens: {
