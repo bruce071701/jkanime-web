@@ -57,7 +57,7 @@ export function AnimeCard({ anime, showEpisodeCount = false }: AnimeCardProps) {
         </div>
 
         {/* Rating badge */}
-        {rating && (
+        {rating && rating !== 'NaN' && !isNaN(Number(rating)) && (
           <div className={`absolute top-2 right-2 ${getRatingColorClass(rating)} text-white text-xs px-2 py-1 rounded flex items-center`}>
             <Star className="h-3 w-3 mr-1" />
             {rating}
@@ -108,7 +108,7 @@ export function AnimeCard({ anime, showEpisodeCount = false }: AnimeCardProps) {
         
         <div className="flex items-center justify-between text-sm text-gray-400">
           <div className="flex items-center gap-2">
-            {year && !isNaN(year) && (
+            {year && !isNaN(year) && year > 0 && (
               <div className="flex items-center">
                 <Calendar className="h-3 w-3 mr-1" />
                 {year}

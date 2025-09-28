@@ -148,7 +148,7 @@ export function AnimeDetailPage() {
                   </div>
                 )}
                 
-                {rating && (
+                {rating && rating !== 'NaN' && !isNaN(Number(rating)) && (
                   <div className={`flex items-center px-3 py-1 rounded text-white ${getRatingColorClass(rating)}`}>
                     <Star className="h-4 w-4 mr-2" />
                     {rating}
