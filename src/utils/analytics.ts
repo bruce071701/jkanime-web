@@ -1,5 +1,5 @@
 // Google Analytics 工具函数
-import { ANALYTICS_CONFIG, CONVERSION_EVENTS, ENGAGEMENT_EVENTS } from '../config/analytics';
+import { ANALYTICS_CONFIG } from '../config/analytics';
 
 declare global {
   interface Window {

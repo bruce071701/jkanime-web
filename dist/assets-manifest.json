@@ -1,0 +1,242 @@
+[
+  {
+    "path": "_functions/_middleware.ts",
+    "size": 9457,
+    "modified": "2025-09-28T02:53:19.464Z"
+  },
+  {
+    "path": "_functions/api/update-content.ts",
+    "size": 6785,
+    "modified": "2025-09-28T02:53:19.467Z"
+  },
+  {
+    "path": "_functions/scheduled/update-content.ts",
+    "size": 4526,
+    "modified": "2025-09-28T02:53:19.469Z"
+  },
+  {
+    "path": "_functions/seo/[...path].ts",
+    "size": 10713,
+    "modified": "2025-09-28T02:53:19.471Z"
+  },
+  {
+    "path": "_headers",
+    "size": 1556,
+    "modified": "2025-09-28T02:53:19.460Z"
+  },
+  {
+    "path": "_redirects",
+    "size": 520,
+    "modified": "2025-09-28T02:53:19.461Z"
+  },
+  {
+    "path": "assets/index-Be9niS58.css",
+    "size": 32648,
+    "modified": "2025-09-28T02:53:19.380Z"
+  },
+  {
+    "path": "assets/index-CyjYhZB7.js",
+    "size": 243776,
+    "modified": "2025-09-28T02:53:19.380Z"
+  },
+  {
+    "path": "assets/index-CyjYhZB7.js.map",
+    "size": 940679,
+    "modified": "2025-09-28T02:53:19.380Z"
+  },
+  {
+    "path": "build-info.json",
+    "size": 141,
+    "modified": "2025-09-28T02:53:19.518Z"
+  },
+  {
+    "path": "favicon.ico",
+    "size": 167,
+    "modified": "2025-09-28T02:53:18.546Z"
+  },
+  {
+    "path": "index.html",
+    "size": 2762,
+    "modified": "2025-09-28T02:53:19.380Z"
+  },
+  {
+    "path": "jkanime-icon.svg",
+    "size": 1819,
+    "modified": "2025-09-28T02:53:18.547Z"
+  },
+  {
+    "path": "robots.txt",
+    "size": 293,
+    "modified": "2025-09-28T02:53:18.548Z"
+  },
+  {
+    "path": "sitemap-dynamic.xml",
+    "size": 11984,
+    "modified": "2025-09-28T02:53:18.548Z"
+  },
+  {
+    "path": "sitemap.xml",
+    "size": 8501,
+    "modified": "2025-09-28T02:53:18.550Z"
+  },
+  {
+    "path": "static/anime/3481.html",
+    "size": 7049,
+    "modified": "2025-09-28T02:53:19.474Z"
+  },
+  {
+    "path": "static/anime/3482.html",
+    "size": 8031,
+    "modified": "2025-09-28T02:53:19.475Z"
+  },
+  {
+    "path": "static/anime/3483.html",
+    "size": 6506,
+    "modified": "2025-09-28T02:53:19.476Z"
+  },
+  {
+    "path": "static/anime/3484.html",
+    "size": 8321,
+    "modified": "2025-09-28T02:53:19.476Z"
+  },
+  {
+    "path": "static/anime/3485.html",
+    "size": 8889,
+    "modified": "2025-09-28T02:53:19.477Z"
+  },
+  {
+    "path": "static/anime/3486.html",
+    "size": 7520,
+    "modified": "2025-09-28T02:53:19.479Z"
+  },
+  {
+    "path": "static/anime/3487.html",
+    "size": 9611,
+    "modified": "2025-09-28T02:53:19.481Z"
+  },
+  {
+    "path": "static/anime/3488.html",
+    "size": 6704,
+    "modified": "2025-09-28T02:53:19.482Z"
+  },
+  {
+    "path": "static/anime/3489.html",
+    "size": 9833,
+    "modified": "2025-09-28T02:53:19.484Z"
+  },
+  {
+    "path": "static/anime/3490.html",
+    "size": 6978,
+    "modified": "2025-09-28T02:53:19.486Z"
+  },
+  {
+    "path": "static/anime/3491.html",
+    "size": 4675,
+    "modified": "2025-09-28T02:53:19.487Z"
+  },
+  {
+    "path": "static/anime/3492.html",
+    "size": 7333,
+    "modified": "2025-09-28T02:53:19.488Z"
+  },
+  {
+    "path": "static/anime/3493.html",
+    "size": 9483,
+    "modified": "2025-09-28T02:53:19.489Z"
+  },
+  {
+    "path": "static/anime/3494.html",
+    "size": 8932,
+    "modified": "2025-09-28T02:53:19.491Z"
+  },
+  {
+    "path": "static/anime/3495.html",
+    "size": 5238,
+    "modified": "2025-09-28T02:53:19.493Z"
+  },
+  {
+    "path": "static/anime/3496.html",
+    "size": 5571,
+    "modified": "2025-09-28T02:53:19.493Z"
+  },
+  {
+    "path": "static/anime/3497.html",
+    "size": 7357,
+    "modified": "2025-09-28T02:53:19.494Z"
+  },
+  {
+    "path": "static/anime/3498.html",
+    "size": 6209,
+    "modified": "2025-09-28T02:53:19.497Z"
+  },
+  {
+    "path": "static/anime/3499.html",
+    "size": 5306,
+    "modified": "2025-09-28T02:53:19.497Z"
+  },
+  {
+    "path": "static/anime/3500.html",
+    "size": 6870,
+    "modified": "2025-09-28T02:53:19.498Z"
+  },
+  {
+    "path": "static/generos/acci-n.html",
+    "size": 9848,
+    "modified": "2025-09-28T02:53:19.499Z"
+  },
+  {
+    "path": "static/generos/accion.html",
+    "size": 9817,
+    "modified": "2025-09-28T02:53:19.501Z"
+  },
+  {
+    "path": "static/generos/aventura.html",
+    "size": 10111,
+    "modified": "2025-09-28T02:53:19.503Z"
+  },
+  {
+    "path": "static/generos/comedia.html",
+    "size": 9803,
+    "modified": "2025-09-28T02:53:19.504Z"
+  },
+  {
+    "path": "static/generos/drama.html",
+    "size": 10064,
+    "modified": "2025-09-28T02:53:19.506Z"
+  },
+  {
+    "path": "static/generos/fantas-a.html",
+    "size": 10218,
+    "modified": "2025-09-28T02:53:19.507Z"
+  },
+  {
+    "path": "static/generos/fantasia.html",
+    "size": 10187,
+    "modified": "2025-09-28T02:53:19.509Z"
+  },
+  {
+    "path": "static/generos/romance.html",
+    "size": 9558,
+    "modified": "2025-09-28T02:53:19.509Z"
+  },
+  {
+    "path": "static/generos/shonen.html",
+    "size": 9698,
+    "modified": "2025-09-28T02:53:19.510Z"
+  },
+  {
+    "path": "static/generos/sobrenatural.html",
+    "size": 9939,
+    "modified": "2025-09-28T02:53:19.514Z"
+  },
+  {
+    "path": "static/index.html",
+    "size": 6160,
+    "modified": "2025-09-28T02:53:19.515Z"
+  },
+  {
+    "path": "sw.js",
+    "size": 2952,
+    "modified": "2025-09-28T02:53:19.517Z"
+  }
+]

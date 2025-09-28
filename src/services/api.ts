@@ -8,7 +8,10 @@ import {
   SearchParams 
 } from '../types/api';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api-jk.funnyu.xyz';
+// 在 Cloudflare Pages 上使用代理路径，本地开发使用直接API
+const API_BASE_URL = import.meta.env.PROD 
+  ? '' // 生产环境使用相对路径，通过 _redirects 代理
+  : (import.meta.env.VITE_API_BASE_URL || 'https://api-jk.funnyu.xyz');
 
 class ApiService {
   private async request<T>(endpoint: string): Promise<T> {

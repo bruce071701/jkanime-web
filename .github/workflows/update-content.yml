@@ -1,0 +1,76 @@
+name: Update Content (Optional)
+
+on:
+  # 手动触发
+  workflow_dispatch:
+    inputs:
+      force_update:
+        description: 'Force update even if content is recent'
+        required: false
+        default: 'false'
+        type: boolean
+
+  # 可选：每天运行一次（如果你想使用GitHub Actions）
+  # schedule:
+  #   - cron: '0 6 * * *'
+
+jobs:
+  update-content:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      # 注意：这里使用内置的 GITHUB_TOKEN，无需额外配置
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Update content
+      run: |
+        if [ "${{ github.event.inputs.force_update }}" = "true" ]; then
+          npm run update:content -- --force
+        else
+          npm run update:content
+        fi
+    
+    - name: Generate sitemap
+      run: npm run generate:sitemap
+    
+    - name: Generate static pages
+      run: npm run generate:static
+    
+    - name: Check for changes
+      id: changes
+      run: |
+        if [ -n "$(git status --porcelain)" ]; then
+          echo "changes=true" >> $GITHUB_OUTPUT
+        else
+          echo "changes=false" >> $GITHUB_OUTPUT
+        fi
+    
+    - name: Commit and push changes
+      if: steps.changes.outputs.changes == 'true'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add .
+        git commit -m "🤖 Auto-update content and sitemap [$(date +'%Y-%m-%d %H:%M:%S')]"
+        git push
+      env:
+        # 使用内置的 GITHUB_TOKEN，无需额外配置
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Trigger Cloudflare Pages update
+      if: steps.changes.outputs.changes == 'true'
+      run: |
+        # 可选：调用 Cloudflare Pages 的更新 API
+        # curl -X POST "https://your-site.pages.dev/api/update-content" \
+        #      -H "Content-Type: application/json"
+        echo "Content updated, Cloudflare Pages will automatically deploy"

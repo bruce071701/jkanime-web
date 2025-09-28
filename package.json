@@ -5,9 +5,12 @@
   "scripts": {
     "dev": "vite",
     "build": "npm run generate:sitemap && tsc && vite build",
+    "build:cloudflare": "node scripts/build-cloudflare.js",
     "preview": "vite preview",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "generate:sitemap": "node scripts/generate-sitemap.js"
+    "generate:sitemap": "node scripts/generate-sitemap.js",
+    "generate:static": "node scripts/generate-static-pages.js",
+    "update:content": "node scripts/update-content.js"
   },
   "dependencies": {
     "react": "^18.2.0",

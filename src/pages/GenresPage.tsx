@@ -7,7 +7,7 @@ import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { Pagination } from '../components/Pagination';
 import { AnimeFilters } from '../components/AnimeFilters';
-import { trackGenreView, trackLanguageFilter } from '../utils/analytics';
+import { trackGenreView } from '../utils/analytics';
 
 export function GenresPage() {
   const [searchParams, setSearchParams] = useSearchParams();

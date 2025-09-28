@@ -122,6 +122,16 @@ export function clearWatchHistory(): void {
   }
 }
 
+// 开发工具：清除所有本地存储数据
+export function clearAllLocalStorage(): void {
+  try {
+    localStorage.clear();
+    console.log('All localStorage data cleared');
+  } catch (error) {
+    console.error('Error clearing localStorage:', error);
+  }
+}
+
 // 获取特定动漫的观看历史
 export function getAnimeWatchHistory(animeId: number): WatchHistoryItem[] {
   const allHistory = getWatchHistory();

@@ -5,8 +5,12 @@
  * 可以在构建时运行以包含最新的动漫数据
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const API_BASE_URL = 'https://api-jk.funnyu.xyz';
 const SITE_BASE_URL = 'https://jkanimeflv.com';
@@ -171,8 +175,8 @@ async function main() {
 }
 
 // 如果直接运行此脚本
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   main();
 }
 
-module.exports = { generateSitemapXML, fetchAnimeData };
+export { generateSitemapXML, fetchAnimeData };

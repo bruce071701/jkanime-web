@@ -9,11 +9,15 @@ interface WatchHistoryProps {
   compact?: boolean;
   hideWhenEmpty?: boolean; // 新属性：在没有历史记录时隐藏组件
   wrapInSection?: boolean; // 新属性：是否包装在section中
+  homeMode?: boolean; // 新属性：首页模式，更紧凑的显示
 }
 
-export function WatchHistory({ limit = 10, showHeader = true, compact = false, hideWhenEmpty = false, wrapInSection = false }: WatchHistoryProps) {
+export function WatchHistory({ limit = 10, showHeader = true, compact = false, hideWhenEmpty = false, wrapInSection = false, homeMode = false }: WatchHistoryProps) {
   const [history, setHistory] = useState<WatchHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // 调试日志
+  console.log('WatchHistory props:', { homeMode, compact, limit });
 
   const loadHistory = () => {
     try {
@@ -87,12 +91,12 @@ export function WatchHistory({ limit = 10, showHeader = true, compact = false, h
   }
 
   const content = (
-    <div className={compact ? '' : 'bg-gray-800 rounded-xl p-6'}>
+    <div className={compact ? '' : homeMode ? 'bg-gray-800 rounded-xl p-4' : 'bg-gray-800 rounded-xl p-6'}>
       {showHeader && (
-        <div className="flex items-center justify-between mb-6">
+        <div className={`flex items-center justify-between ${homeMode ? 'mb-4' : 'mb-6'}`}>
           <div className="flex items-center gap-3">
-            <Clock className="h-6 w-6 text-blue-400" />
-            <h2 className="text-xl font-bold">Continuar viendo</h2>
+            <Clock className={`${homeMode ? 'h-5 w-5' : 'h-6 w-6'} text-blue-400`} />
+            <h2 className={`${homeMode ? 'text-lg' : 'text-xl'} font-bold`}>Continuar viendo</h2>
           </div>
           <div className="flex items-center gap-2">
             <Link
@@ -115,13 +119,19 @@ export function WatchHistory({ limit = 10, showHeader = true, compact = false, h
         </div>
       )}
 
-      <div className={compact ? 'space-y-3' : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'}>
+      <div className={
+        compact ? 'space-y-3' : 
+        homeMode ? 'flex gap-4 overflow-x-auto pb-2 scrollbar-hide' :
+        'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
+      }>
         {history.map((item) => (
           <div
             key={`${item.animeId}-${item.episodeId}`}
             className={`group relative ${
               compact 
                 ? 'flex items-center space-x-3 p-3 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors'
+                : homeMode
+                ? 'flex items-center space-x-3 p-3 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors flex-shrink-0 h-36'
                 : 'bg-gray-700 rounded-lg overflow-hidden hover:bg-gray-600 transition-all duration-200 hover:scale-105'
             }`}
           >
@@ -136,10 +146,18 @@ export function WatchHistory({ limit = 10, showHeader = true, compact = false, h
 
             <Link
               to={`/watch/${item.episodeId}`}
-              className={`flex ${compact ? 'flex-row items-center flex-1' : 'flex-col'}`}
+              className={`flex ${
+                compact ? 'flex-row items-center flex-1' : 
+                homeMode ? 'flex-row items-center flex-1' :
+                'flex-col'
+              }`}
             >
               {/* Poster */}
-              <div className={`relative ${compact ? 'w-12 h-16 flex-shrink-0' : 'aspect-[3/4] w-full'}`}>
+              <div className={`relative ${
+                compact ? 'w-12 h-16 flex-shrink-0' : 
+                homeMode ? 'w-20 h-28 flex-shrink-0' :
+                'aspect-[3/4] w-full'
+              }`}>
                 {item.animePoster ? (
                   <img
                     src={item.animePoster}
@@ -179,27 +197,41 @@ export function WatchHistory({ limit = 10, showHeader = true, compact = false, h
               </div>
 
               {/* Info */}
-              <div className={`${compact ? 'flex-1 min-w-0 ml-3' : 'p-3'}`}>
-                <h3 className={`font-medium text-white line-clamp-2 ${compact ? 'text-sm' : 'text-base'} mb-1`}>
+              <div className={`${
+                compact ? 'flex-1 min-w-0 ml-3' : 
+                homeMode ? 'flex-1 min-w-0 ml-2' :
+                'p-3'
+              }`}>
+                <h3 className={`font-medium text-white line-clamp-2 ${
+                  compact ? 'text-sm' : 
+                  homeMode ? 'text-sm' :
+                  'text-base'
+                } ${homeMode ? 'mb-1' : 'mb-1'}`}>
                   {item.animeTitle}
                 </h3>
                 
                 {/* Episode info with progress for series */}
                 {item.animeType === 'series' && item.watchedEpisodesCount && item.latestEpisodeNumber ? (
-                  <div className={`${compact ? 'text-xs' : 'text-sm'} mb-1`}>
-                    <p className="text-blue-400">
-                      Episodio {item.latestEpisodeNumber}
-                      {item.episodeTitle && ` - ${item.episodeTitle}`}
+                  <div className={`${
+                    compact ? 'text-xs' : 
+                    homeMode ? 'text-xs' :
+                    'text-sm'
+                  } mb-1`}>
+                    <p className="text-blue-400 truncate text-sm">
+                      EP {item.latestEpisodeNumber}
+                      {!homeMode && item.episodeTitle && ` - ${item.episodeTitle}`}
                     </p>
-                    <p className="text-green-400 text-xs mb-1">
-                      {formatWatchProgress(item.watchedEpisodesCount, item.totalEpisodes)}
-                    </p>
+                    {!homeMode && (
+                      <p className="text-green-400 text-xs mb-1">
+                        {formatWatchProgress(item.watchedEpisodesCount, item.totalEpisodes)}
+                      </p>
+                    )}
                     
                     {/* Progress bar for series with known total episodes */}
                     {item.totalEpisodes && item.totalEpisodes > 0 && (
-                      <div className="w-full bg-gray-600 rounded-full h-1.5 mb-1">
+                      <div className={`w-full bg-gray-600 rounded-full ${homeMode ? 'h-0.5 mt-1' : 'h-1.5'} mb-1`}>
                         <div 
-                          className="bg-green-500 h-1.5 rounded-full transition-all duration-300"
+                          className={`bg-green-500 ${homeMode ? 'h-0.5' : 'h-1.5'} rounded-full transition-all duration-300`}
                           style={{ 
                             width: `${Math.min((item.watchedEpisodesCount / item.totalEpisodes) * 100, 100)}%` 
                           }}
@@ -208,27 +240,33 @@ export function WatchHistory({ limit = 10, showHeader = true, compact = false, h
                     )}
                   </div>
                 ) : (
-                  <p className={`text-blue-400 ${compact ? 'text-xs' : 'text-sm'} mb-1`}>
-                    {item.animeType === 'movie' ? 'Película' : `Episodio ${item.episodeNumber}`}
-                    {item.episodeTitle && ` - ${item.episodeTitle}`}
+                  <p className={`text-blue-400 ${
+                    compact ? 'text-xs' : 
+                    homeMode ? 'text-sm' :
+                    'text-sm'
+                  } mb-1 truncate`}>
+                    {item.animeType === 'movie' ? 'Película' : `EP ${item.episodeNumber}`}
+                    {!homeMode && item.episodeTitle && ` - ${item.episodeTitle}`}
                   </p>
                 )}
                 
-                <div className={`flex items-center text-gray-400 ${compact ? 'text-xs' : 'text-sm'}`}>
-                  <Clock className="h-3 w-3 mr-1" />
-                  <span>
-                    {new Date(item.watchedAt).toLocaleDateString('es-ES', {
-                      month: 'short',
-                      day: 'numeric'
-                    })}
-                  </span>
-                  {item.duration && (
-                    <>
-                      <span className="mx-1">•</span>
-                      <span>{item.duration}</span>
-                    </>
-                  )}
-                </div>
+                {!homeMode && (
+                  <div className={`flex items-center text-gray-400 ${compact ? 'text-xs' : 'text-sm'}`}>
+                    <Clock className="h-3 w-3 mr-1" />
+                    <span>
+                      {new Date(item.watchedAt).toLocaleDateString('es-ES', {
+                        month: 'short',
+                        day: 'numeric'
+                      })}
+                    </span>
+                    {item.duration && (
+                      <>
+                        <span className="mx-1">•</span>
+                        <span>{item.duration}</span>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
             </Link>
           </div>
@@ -252,7 +290,7 @@ export function WatchHistory({ limit = 10, showHeader = true, compact = false, h
   // 如果需要包装在section中（如在HomePage中）
   if (wrapInSection) {
     return (
-      <section className="mb-16">
+      <section className={homeMode ? 'mb-6' : 'mb-16'}>
         {content}
       </section>
     );

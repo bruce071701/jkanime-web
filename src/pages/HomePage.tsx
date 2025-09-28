@@ -6,7 +6,6 @@ import { HomeData } from '../types/api';
 import { AnimeCard } from '../components/AnimeCard';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ErrorMessage } from '../components/ErrorMessage';
-import { WatchHistory } from '../components/WatchHistory';
 import { trackEngagement } from '../utils/analytics';
 
 export function HomePage() {
@@ -104,8 +103,6 @@ export function HomePage() {
       </section>
 
       <div className="container-custom py-16">
-        {/* Watch History */}
-        <WatchHistory limit={8} hideWhenEmpty wrapInSection />
 
         {/* Últimas Películas */}
         {homeData.latestMovies && homeData.latestMovies.length > 0 && (
