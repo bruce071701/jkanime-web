@@ -279,26 +279,8 @@ async function main() {
       fs.rmSync(BUILD_CONFIG.outputDir, { recursive: true, force: true });
     }
     
-    // 2. 更新内容（如果启用）
-    if (BUILD_CONFIG.updateContent) {
-      execCommand('node scripts/update-content.js', 'Updating content');
-    }
-    
-    // 3. 生成静态页面
-    if (BUILD_CONFIG.generateStaticPages) {
-      execCommand('node scripts/generate-static-pages.js', 'Generating static pages');
-    }
-    
-    // 4. 生成sitemap
-    if (BUILD_CONFIG.generateSitemap) {
-      execCommand('node scripts/generate-sitemap.js', 'Generating sitemap');
-    }
-    
-    // 5. 运行TypeScript编译
-    execCommand('tsc --noEmit', 'Compiling TypeScript');
-    
-    // 6. 运行Vite构建
-    execCommand('vite build', 'Building with Vite');
+    // 2. 运行标准构建流程（包含内容更新、静态页面生成、sitemap生成、编译和构建）
+    execCommand('npm run build', 'Running standard build process');
     
     // 7. 复制Cloudflare Pages配置文件
     log('Copying Cloudflare Pages configuration...', 'build');
