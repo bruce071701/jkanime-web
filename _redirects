@@ -17,5 +17,12 @@
 /anime/:id /static/anime/:id.html 200
 /generos/:genre /static/generos/:genre.html 200
 
-# SPA 回退 - 所有未匹配的路由返回 index.html
+# 静态文件优先 - 不被SPA拦截
+/sitemap.xml /sitemap.xml 200
+/sitemap-dynamic.xml /sitemap-dynamic.xml 200
+/robots.txt /robots.txt 200
+/favicon.ico /favicon.ico 200
+/jkanime-icon.svg /jkanime-icon.svg 200
+
+# SPA 回退 - 所有未匹配的路由返回 index.html（排除静态文件）
 /* /index.html 200

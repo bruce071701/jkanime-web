@@ -60,11 +60,15 @@
 # Sitemap 和 robots
 /sitemap.xml
   Cache-Control: public, max-age=86400
-  Content-Type: application/xml
+  Content-Type: application/xml; charset=utf-8
+
+/sitemap-dynamic.xml
+  Cache-Control: public, max-age=3600
+  Content-Type: application/xml; charset=utf-8
 
 /robots.txt
   Cache-Control: public, max-age=86400
-  Content-Type: text/plain
+  Content-Type: text/plain; charset=utf-8
 
 # API 代理缓存
 /api/*
