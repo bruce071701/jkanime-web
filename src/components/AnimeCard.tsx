@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
-import { Play, Star, Calendar, Clock } from 'lucide-react';
+import { Play, Star, Clock } from 'lucide-react';
 import { Anime } from '../types/api';
 import { processRating, getRatingColorClass } from '../utils/rating';
-import { formatType, formatLang, getYear, isMovieType, isSeriesType } from '../utils/format';
+import { formatType, getYear, isMovieType, isSeriesType } from '../utils/format';
 import { getAnimeProgress } from '../utils/watchHistory';
 import { trackAnimeView } from '../utils/analytics';
 
@@ -85,8 +85,8 @@ export function AnimeCard({ anime, showEpisodeCount = false }: AnimeCardProps) {
         </div>
 
         {/* 只保留评分徽章 - 如果有的话 */}
-        {isValidValue(rating) && isValidNumber(rating) && (
-          <div className={`absolute top-2 right-2 ${getRatingColorClass(rating)} text-white text-xs px-2 py-1 rounded-md backdrop-blur-sm flex items-center font-medium`}>
+        {rating && isValidValue(rating) && isValidNumber(rating) && (
+          <div className={`absolute top-2 right-2 ${getRatingColorClass(rating as string)} text-white text-xs px-2 py-1 rounded-md backdrop-blur-sm flex items-center font-medium`}>
             <Star className="h-3 w-3 mr-1 fill-current" />
             {rating}
           </div>
@@ -122,7 +122,7 @@ export function AnimeCard({ anime, showEpisodeCount = false }: AnimeCardProps) {
         </h3>
 
         {/* 只在有年份时显示一个小的年份标签 */}
-        {isValidNumber(year) && year > 1900 && year <= new Date().getFullYear() + 5 && (
+        {year && isValidNumber(year) && year > 1900 && year <= new Date().getFullYear() + 5 && (
           <div className="mt-2">
             <span className="text-xs text-gray-400 bg-gray-700/50 px-2 py-1 rounded">
               {year}
