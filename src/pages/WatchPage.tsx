@@ -236,7 +236,7 @@ export function WatchPage() {
           {/* Anime Info */}
           {anime && (
             <div className="bg-gray-900 rounded-lg p-6">
-              <h3 className="text-lg font-semibold mb-2">{anime.name}</h3>
+              <h3 className="text-lg font-semibold mb-2">{anime.name && anime.name !== 'NaN' && anime.name !== 'null' ? anime.name : 'Título no disponible'}</h3>
               <div className="space-y-2 text-sm text-gray-400">
                 <div className="flex items-center justify-between">
                   <span>Tipo:</span>

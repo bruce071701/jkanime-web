@@ -6,6 +6,34 @@ import { formatType, formatLang, getYear, isMovieType, isSeriesType } from '../u
 import { getAnimeProgress } from '../utils/watchHistory';
 import { trackAnimeView } from '../utils/analytics';
 
+// 辅助函数：检查值是否为有效值（不是 NaN、null、undefined 或字符串 "NaN"）
+const isValidValue = (value: any): boolean => {
+  if (value === null || value === undefined) return false;
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    return trimmed !== '' && trimmed !== 'NaN' && trimmed !== 'null' && trimmed !== 'undefined';
+  }
+  if (typeof value === 'number') {
+    return !isNaN(value) && isFinite(value);
+  }
+  return true;
+};
+
+// 辅助函数：检查数字值是否有效
+const isValidNumber = (value: any): boolean => {
+  if (value === null || value === undefined) return false;
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (trimmed === '' || trimmed === 'NaN' || trimmed === 'null' || trimmed === 'undefined') return false;
+    const num = Number(trimmed);
+    return !isNaN(num) && isFinite(num);
+  }
+  if (typeof value === 'number') {
+    return !isNaN(value) && isFinite(value);
+  }
+  return false;
+};
+
 interface AnimeCardProps {
   anime: Anime;
   showEpisodeCount?: boolean;
@@ -15,116 +43,91 @@ export function AnimeCard({ anime, showEpisodeCount = false }: AnimeCardProps) {
   const rating = processRating(anime.rating || '', anime.voteAverage);
   const year = anime.aired ? getYear(anime.aired) : null;
   const { watchedEpisodes } = getAnimeProgress(anime.id);
-  
+
   // 确保动漫名称不为空或NaN
-  const animeName = anime.name && anime.name !== 'NaN' && anime.name !== 'null' ? anime.name : 'Título no disponible';
+  const animeName = isValidValue(anime.name) ? anime.name : 'Título no disponible';
 
   return (
     <Link
       to={`/anime/${anime.id}`}
-      className="group bg-gray-800 rounded-lg sm:rounded-xl overflow-hidden hover:bg-gray-750 transition-all duration-300 sm:hover:scale-105 shadow-lg hover:shadow-xl touch-manipulation"
-      onClick={() => trackAnimeView(anime.id, anime.name, anime.type, window.location.pathname)}
+      className="group bg-gray-800 rounded-lg overflow-hidden hover:bg-gray-750 transition-all duration-300 hover:scale-[1.02] shadow-md hover:shadow-xl hover:shadow-blue-500/20 touch-manipulation flex flex-col h-full"
+      onClick={() => trackAnimeView(anime.id, animeName, anime.type, window.location.pathname)}
     >
       <div className="aspect-[3/4] relative overflow-hidden">
         {anime.imagen ? (
           <img
             src={anime.imagen}
-            alt={anime.name}
+            alt={animeName}
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.style.display = 'none';
               target.parentElement!.innerHTML = `
                 <div class="w-full h-full bg-gray-700 flex items-center justify-center">
-                  <span class="text-gray-500 text-sm text-center p-4">${anime.name}</span>
+                  <span class="text-gray-500 text-sm text-center p-4">${animeName}</span>
                 </div>
               `;
             }}
           />
         ) : (
           <div className="w-full h-full bg-gray-700 flex items-center justify-center">
-            <span className="text-gray-500 text-sm text-center p-4">{anime.name}</span>
+            <span className="text-gray-500 text-sm text-center p-4">{animeName}</span>
           </div>
         )}
 
         {/* Hover overlay */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all duration-300 flex items-center justify-center">
-          <div className="transform scale-75 group-hover:scale-100 opacity-0 group-hover:opacity-100 transition-all duration-300">
-            <div className="bg-white/20 backdrop-blur-sm rounded-full p-4">
-              <Play className="h-8 w-8 text-white fill-white" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+          <div className="transform scale-75 group-hover:scale-100 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
+            <div className="bg-white/20 backdrop-blur-md rounded-full p-4 shadow-2xl border border-white/20">
+              <Play className="h-8 w-8 text-white fill-white drop-shadow-lg" />
             </div>
           </div>
         </div>
 
-        {/* Rating badge */}
-        {rating && rating !== 'NaN' && !isNaN(Number(rating)) && (
-          <div className={`absolute top-2 right-2 ${getRatingColorClass(rating)} text-white text-xs px-2 py-1 rounded flex items-center`}>
-            <Star className="h-3 w-3 mr-1" />
+        {/* 只保留评分徽章 - 如果有的话 */}
+        {isValidValue(rating) && isValidNumber(rating) && (
+          <div className={`absolute top-2 right-2 ${getRatingColorClass(rating)} text-white text-xs px-2 py-1 rounded-md backdrop-blur-sm flex items-center font-medium`}>
+            <Star className="h-3 w-3 mr-1 fill-current" />
             {rating}
           </div>
         )}
 
-        {/* Type badge */}
-        <div className={`absolute bottom-2 left-2 text-white text-xs px-2 py-1 rounded ${
-          isMovieType(anime.type) ? 'bg-red-600' : 'bg-blue-600'
-        }`}>
+        {/* 类型徽章 - 简化样式 */}
+        <div className={`absolute bottom-2 left-2 text-white text-xs px-2 py-1 rounded-md backdrop-blur-sm font-medium ${isMovieType(anime.type) ? 'bg-red-500/80' : 'bg-blue-500/80'
+          }`}>
           {formatType(anime.type)}
         </div>
 
-        {/* Episode count for series */}
-        {showEpisodeCount && isSeriesType(anime.type) && anime.latestEpisode && anime.latestEpisode !== 'NaN' && (
-          <div className="absolute bottom-2 right-2 bg-green-600 text-white text-xs px-2 py-1 rounded">
+        {/* 集数徽章 - 只在需要时显示 */}
+        {showEpisodeCount && isSeriesType(anime.type) && isValidValue(anime.latestEpisode) && (
+          <div className="absolute bottom-2 right-2 bg-green-500/80 text-white text-xs px-2 py-1 rounded-md backdrop-blur-sm font-medium">
             EP {anime.latestEpisode}
           </div>
         )}
 
-        {/* Language indicator */}
-        <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <span className={`px-2 py-1 text-xs font-medium rounded-full backdrop-blur-sm ${
-            anime.lang === 'castellano' 
-              ? 'bg-purple-600/80 text-white' 
-              : anime.lang === 'latino'
-              ? 'bg-orange-600/80 text-white'
-              : 'bg-blue-600/80 text-white'
-          }`}>
-            {formatLang(anime.lang || 'sub')}
-          </span>
-        </div>
-
-        {/* Watch progress indicator */}
-        {watchedEpisodes > 0 && !isNaN(watchedEpisodes) && (
-          <div className="absolute bottom-8 left-2 bg-green-600/90 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
+        {/* 观看进度 - 只在有进度时显示 */}
+        {isValidNumber(watchedEpisodes) && watchedEpisodes > 0 && (
+          <div className="absolute top-2 left-2 bg-green-500/80 text-white text-xs px-2 py-1 rounded-md backdrop-blur-sm flex items-center gap-1 font-medium">
             <Clock className="h-3 w-3" />
-            {watchedEpisodes} visto{watchedEpisodes !== 1 ? 's' : ''}
+            {watchedEpisodes}
           </div>
         )}
       </div>
 
-      {/* Content */}
-      <div className="p-4">
-        <h3 className="font-semibold text-white mb-2 line-clamp-2 group-hover:text-blue-400 transition-colors">
+      {/* Content - 极简设计 */}
+      <div className="p-3 sm:p-4">
+        {/* 只显示标题 */}
+        <h3 className="font-semibold text-white line-clamp-2 group-hover:text-blue-400 transition-colors text-sm sm:text-base leading-tight">
           {animeName}
         </h3>
-        
-        <div className="flex items-center justify-between text-sm text-gray-400">
-          <div className="flex items-center gap-2">
-            {year && !isNaN(year) && year > 0 && (
-              <div className="flex items-center">
-                <Calendar className="h-3 w-3 mr-1" />
-                {year}
-              </div>
-            )}
-          </div>
-          
-          <div className="text-xs">
-            {anime.visitas && !isNaN(anime.visitas) && anime.visitas > 0 && `${anime.visitas.toLocaleString()} vistas`}
-          </div>
-        </div>
 
-        {anime.genres && (
-          <p className="text-gray-400 text-xs mt-2 truncate">
-            {anime.genres}
-          </p>
+        {/* 只在有年份时显示一个小的年份标签 */}
+        {isValidNumber(year) && year > 1900 && year <= new Date().getFullYear() + 5 && (
+          <div className="mt-2">
+            <span className="text-xs text-gray-400 bg-gray-700/50 px-2 py-1 rounded">
+              {year}
+            </span>
+          </div>
         )}
       </div>
     </Link>
